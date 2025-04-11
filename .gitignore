@@ -1,0 +1,14 @@
+# Ignore binary files
+bin/
+obj/
+*.bin
+*.onnx
+
+# IDE
+.vs/
+.idea/
+*.user
+
+# NuGet
+packages/
+*.nupkg
