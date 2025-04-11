@@ -12,7 +12,7 @@ This project implements a Reinforcement Learning (RL) agent that learns to play 
 
 ## Key Features
 
-- 🕹️ Real-time interaction with Pokémon Red via mGBA emulator  
+- 🕹️ Real-time interaction with Pokémon Red game in the mGBA emulator via Lua scripts
 - 🧠 Custom DQN (Deep Q-Network) implementation using TorchSharp  
 - 🔄 Experience replay buffer for stable training  
 - 📊 State tracking including player position, HP, and map location  
