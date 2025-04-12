@@ -1,6 +1,6 @@
 ﻿using Parquet.Serialization.Attributes;
 using static TorchSharp.torch;
-using Utils;
+using PokemonRedRL.Utils;
 
 namespace PokemonRedRL.Models.ReinforcementLearning;
 
