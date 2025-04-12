@@ -12,8 +12,4 @@
     <PackageReference Include="TorchSharp-cuda-windows" Version="0.105.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Utils\Utils.csproj" />
-  </ItemGroup>
-
 </Project>

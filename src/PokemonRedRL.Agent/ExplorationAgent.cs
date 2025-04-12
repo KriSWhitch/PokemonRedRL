@@ -18,14 +18,30 @@ public class ExplorationAgent
     private const int InputSize = 4; // [hp, map, x, y]
     private const int OutputSize = 8; // 8 действий
 
+    private readonly ExperienceParquetRepository _expRepo;
+    private DateTime _lastBackupTime = DateTime.MinValue;
+
     public ExplorationAgent(MGBASocketClient emulator)
     {
         _emulator = emulator;
         _trainer = new DQNTrainer(InputSize, OutputSize);
         _memory = new ExperienceReplay(MemoryCapacity);
+        _expRepo = new ExperienceParquetRepository();
+        // Загрузка начального опыта
+        _ = LoadInitialExperienceAsync();
+
+        // Загрузка последнего чекпоинта при старте
+        _expRepo.LoadCheckpoint("latest");
     }
 
-    public void RunEpisode()
+    private async Task LoadInitialExperienceAsync()
+    {
+        var samples = await _expRepo.SampleAsync(1000);
+        foreach (var s in samples)
+            _memory.Push(s);
+    }
+
+    public async Task RunEpisodeAsync()
     {
         UpdateState();
         var totalReward = 0f;
@@ -46,14 +62,6 @@ public class ExplorationAgent
             totalReward += reward;
 
             var nextStateTensor = StateToTensor(_currentState);
-            _memory.Push(new Experience
-            {
-                State = stateTensor,
-                Action = action,
-                Reward = reward,
-                NextState = nextStateTensor,
-                Done = false
-            });
 
             if (_memory.Count > BatchSize)
             {
@@ -62,7 +70,25 @@ public class ExplorationAgent
 
             LogProgress(action, reward, totalReward, epsilon);
 
-            Thread.Sleep(500);
+            // Сохранение опыта
+            _expRepo.AddExperience(new Experience
+            {
+                State = stateTensor,
+                Action = action,
+                Reward = reward,
+                NextState = nextStateTensor,
+                Done = false
+            });
+
+            // Резервное копирование каждые 2 часа
+            if ((DateTime.Now - _lastBackupTime).TotalHours >= 2)
+            {
+                await _expRepo.CreateBackupAsync();
+                _expRepo.SaveCheckpoint("latest");
+                _lastBackupTime = DateTime.Now;
+            }
+
+            Thread.Sleep(2000);
         }
     }
 
@@ -91,7 +117,7 @@ public class ExplorationAgent
             case 7: _emulator.PressStart(); break;
         }
 
-        Thread.Sleep(1000);
+        Thread.Sleep(2000);
     }
 
     private void LogProgress(int action, float reward, float totalReward, float epsilon)

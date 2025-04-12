@@ -1,12 +1,28 @@
-﻿using static TorchSharp.torch;
+﻿using Parquet.Serialization.Attributes;
+using static TorchSharp.torch;
+using Utils;
 
 namespace PokemonRedRL.Models.ReinforcementLearning;
 
 public class Experience
 {
-    public Tensor State { get; set; }
+    public byte[] StateBytes { get; set; }
     public int Action { get; set; }
     public float Reward { get; set; }
-    public Tensor NextState { get; set; }
+    public byte[] NextStateBytes { get; set; }
     public bool Done { get; set; }
+
+    [ParquetIgnore]
+    public Tensor State
+    {
+        get => TensorExtensions.LoadTensorFromBytes(StateBytes);
+        set => StateBytes = TensorExtensions.SaveTensorToBytes(value);
+    }
+
+    [ParquetIgnore]
+    public Tensor NextState
+    {
+        get => TensorExtensions.LoadTensorFromBytes(NextStateBytes);
+        set => NextStateBytes = TensorExtensions.SaveTensorToBytes(value);
+    }
 }

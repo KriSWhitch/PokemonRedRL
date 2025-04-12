@@ -3,22 +3,21 @@ package.cpath = package.cpath .. ";D:\\Programming\\PokemonRedRL\\src\\mGBA-0.10
 
 local socket = require("socket")
 
--- Конфигурация
+-- Configuration
 local HOST = "127.0.0.1"
 local PORT = 12345
-local TIMEOUT = 0.1 -- Короткий таймаут для неблокирующего режима
+local TIMEOUT = 0.1 -- Short timeout for non-blocking mode
 
--- Адреса памяти
+-- Memory addresses
 local PLAYER_HP_ADDR = 0xD16B
 local PLAYER_X_ADDR = 0xD362
 local PLAYER_Y_ADDR = 0xD361
-local PLAYER_MAP_ADDR = 0xD35E  -- Текущая карта
+local PLAYER_MAP_ADDR = 0xD35E  -- Current map ID
 
 -- Constants
-
 local EMULATOR_FRAME_RATE = 60;
 
--- Коды кнопок
+-- Button codes
 local BUTTONS = {
     ButtonA = 0x01,
     ButtonB = 0x02,
@@ -30,7 +29,7 @@ local BUTTONS = {
     ButtonDown = 0x80
 }
 
--- Инициализация сервера
+-- Server initialization
 local server = assert(socket.bind(HOST, PORT))
 server:settimeout(TIMEOUT)
 console:log("Server started at "..HOST..":"..PORT)
@@ -42,8 +41,7 @@ local current_input = 0
 local next_frame = EMULATOR_FRAME_RATE
 local reset_before_next_frame = 15
 
--- функция получения текущей локации пользователя
-
+-- Function to get player's current location
 local function get_player_location()
     local x = emu:read8(PLAYER_X_ADDR)
     local y = emu:read8(PLAYER_Y_ADDR)
@@ -51,7 +49,7 @@ local function get_player_location()
     return map, x, y
 end
 
--- Основной цикл (вызывается каждый кадр)
+-- Main loop (called every frame)
 local function frame_callback()
     next_frame = next_frame - 1;
 
@@ -66,14 +64,14 @@ local function frame_callback()
 
     next_frame = EMULATOR_FRAME_RATE
 
-    -- Обработка ввода
+    -- Input handling
     if current_input ~= 0 then
         previous_input = current_input
         emu:addKeys(current_input)
-        current_input = 0 -- Сбрасываем ввод после применения
+        current_input = 0 -- Reset input after applying
     end
     
-    -- Принимаем новые соединения
+    -- Accept new connections
     if not client then
         client = server:accept()
         if client then
@@ -82,7 +80,7 @@ local function frame_callback()
         end
     end
     
-    -- Обработка команд
+    -- Command processing
     if client then
         local cmd, err = client:receive("*l")
         if cmd then
@@ -117,7 +115,7 @@ local function frame_callback()
     end
 end
 
--- Регистрируем callback для каждого кадра
+-- Register frame callback
 callbacks:add('frame', frame_callback)
 
 console:log("Script initialized - waiting for connections")

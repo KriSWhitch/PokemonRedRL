@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Parquet.Net" Version="5.1.1" />
+    <PackageReference Include="TorchSharp" Version="0.105.0" />
+    <PackageReference Include="TorchSharp-cuda-windows" Version="0.105.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\PokemonRedRL.Core\PokemonRedRL.Core.csproj" />
     <ProjectReference Include="..\PokemonRedRL.Models\PokemonRedRL.Models.csproj" />
   </ItemGroup>
