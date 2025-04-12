@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using PokemonRedRL.Core.Enums;
 
@@ -132,19 +133,29 @@ public class MGBASocketClient : IDisposable
             throw new Exception($"Unexpected response: {response}");
     }
 
-    public (int hp, int mapId, int x, int y) GetGameState()
+    public GameStateResponse GetGameState()
     {
-        string response = SendCommandInternal("get_state");
-        var parts = response.Split(',');
-        if (parts.Length != 4)
-            throw new Exception($"Invalid response format: {response}");
+        string jsonResponse = SendCommandInternal("get_state");
 
-        return (
-            int.Parse(parts[0]), // HP
-            int.Parse(parts[1]), // MapId
-            int.Parse(parts[2]), // X
-            int.Parse(parts[3])  // Y
-        );
+        try
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                AllowTrailingCommas = true
+            };
+
+            var state = JsonSerializer.Deserialize<GameStateResponse>(jsonResponse, options);
+
+            if (state == null)
+                throw new Exception("Empty response from emulator");
+
+            return state;
+        }
+        catch (JsonException ex)
+        {
+            throw new Exception($"JSON parsing error: {ex.Message}\nResponse: {jsonResponse}");
+        }
     }
 
     public void PressA()
