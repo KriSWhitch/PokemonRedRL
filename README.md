@@ -26,6 +26,7 @@ This project implements a Reinforcement Learning (RL) agent that learns to play 
     │   ├── Emulator               
     │   └── Enums  
     ├── PokemonRedRL.Models     # Neural network models and training
+    ├── PokemonRedRL.Utils      # Helpers
     └── scripts
         └── mgba_socket.lua     # Lua bridge script
 
