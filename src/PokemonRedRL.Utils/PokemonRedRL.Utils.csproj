@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PokemonRedRL.Core\PokemonRedRL.Core.csproj" />
+    <ProjectReference Include="..\PokemonRedRL.DAL\PokemonRedRL.DAL.csproj" />
   </ItemGroup>
 
 </Project>

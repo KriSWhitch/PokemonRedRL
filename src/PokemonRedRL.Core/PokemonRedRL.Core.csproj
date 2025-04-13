@@ -13,4 +13,9 @@
     <PackageReference Include="TorchSharp-cuda-windows" Version="0.105.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PokemonRedRL.DAL\PokemonRedRL.DAL.csproj" />
+    <ProjectReference Include="..\PokemonRedRL.Utils\PokemonRedRL.Utils.csproj" />
+  </ItemGroup>
+
 </Project>

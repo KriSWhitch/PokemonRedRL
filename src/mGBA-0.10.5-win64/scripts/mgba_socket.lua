@@ -7,6 +7,9 @@ local json = require("lunajson")
 -- Configuration
 local HOST = "127.0.0.1"
 local PORT = 12345
+if arg and arg[1] then
+    PORT = tonumber(arg[1]) or PORT -- Если аргумент некорректный, используется значение по умолчанию
+end
 local TIMEOUT = 0.1 -- Short timeout for non-blocking mode
 
 -- Memory addresses

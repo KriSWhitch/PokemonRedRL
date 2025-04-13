@@ -1,9 +1,10 @@
 ﻿using static TorchSharp.torch;
 using TorchSharp;
 using static TorchSharp.torch.nn;
-using PokemonRedRL.Core.Enums;
+using PokemonRedRL.Utils.Enums;
+using PokemonRedRL.Models.ReinforcementLearning;
 
-namespace PokemonRedRL.Models.ReinforcementLearning;
+namespace PokemonRedRL.Models.Experience;
 
 public class DQNTrainer
 {

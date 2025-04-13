@@ -1,17 +1,15 @@
 ﻿using PokemonRedRL.Core.Emulator;
-using PokemonRedRL.Models.ReinforcementLearning;
-using static TorchSharp.torch;
-using TorchSharp;
-using TorchSharp.Modules;
-using PokemonRedRL.Core.Enums;
-using PokemonRedRL.Utils.Interfaces;
-using PokemonRedRL.Utils.Services;
+using PokemonRedRL.Core.Helpers;
+using PokemonRedRL.Core.Interfaces;
+using PokemonRedRL.DAL.Models;
+using PokemonRedRL.Models.Experience;
+using PokemonRedRL.Utils.Enums;
 
 namespace PokemonRedRL.Agent;
 
 public class ExplorationAgent
 {
-    private readonly MGBASocketClient _emulator;
+    private readonly IEmulatorClient _emulator;
     private readonly DQNTrainer _trainer;
     private readonly ExperienceReplay _memory;
     private readonly GameState _currentState = new();
@@ -30,12 +28,8 @@ public class ExplorationAgent
 
     private readonly ExperienceParquetRepository _expRepo;
     private DateTime _lastBackupTime = DateTime.MinValue;
-    private int _previousBadges;
-    private int _previousMoney;
-    private List<int> _previousLevels = new();
-    private bool _wasInBattle;
 
-    public ExplorationAgent(MGBASocketClient emulator, 
+    public ExplorationAgent(IEmulatorClient emulator, 
         IRewardCalculatorService rewardCalculatorService,
         IStatePreprocessorService statePreprocessorService)
     {
@@ -54,15 +48,10 @@ public class ExplorationAgent
         _expRepo.LoadCheckpoint("latest");
     }
 
-    private async Task LoadInitialExperienceAsync()
-    {
-        var samples = await _expRepo.SampleAsync(1000);
-        foreach (var s in samples)
-            _memory.Push(s);
-    }
-
     public async Task RunEpisodeAsync()
     {
+        Console.WriteLine($"Starting agent on port {_emulator.CurrentPort}");
+
         UpdateState();
         var totalReward = 0f;
         var visitedLocations = new HashSet<string>();
@@ -73,7 +62,7 @@ public class ExplorationAgent
             var epsilon = GetEpsilon();
             var action = _trainer.SelectAction(stateTensor, epsilon);
 
-            ExecuteAction(action);
+            ActionExecutor.ExecuteAction(_emulator, action);
             var (prevMap, prevX, prevY) = (_currentState.MapId, _currentState.X, _currentState.Y);
             UpdateState();
 
@@ -110,42 +99,23 @@ public class ExplorationAgent
         }
     }
 
-    private void ExecuteAction(ActionType action)
+    private async Task LoadInitialExperienceAsync()
     {
-        switch (action)
+        var samples = await _expRepo.SampleAsync(-1);
+
+        // Логируем сколько загрузили
+        Console.WriteLine($"Loaded {samples.Count} experiences from base file");
+
+        foreach (var s in samples.Where(s => s != null))
         {
-            case ActionType.Up: _emulator.PressUp(); break;
-            case ActionType.Down: _emulator.PressDown(); break;
-            case ActionType.Left: _emulator.PressLeft(); break;
-            case ActionType.Right: _emulator.PressRight(); break;
-            case ActionType.A: _emulator.PressA(); break;
-            case ActionType.B: _emulator.PressB(); break;
+            _memory.Push(s);
         }
     }
 
     private void LogProgress(ActionType action, float reward, float totalReward, float epsilon)
     {
         Console.WriteLine($"Map: {_currentState.MapId} | Pos: ({_currentState.X},{_currentState.Y}) | " +
-            $"Action: {GetActionName(action)} | Reward: {reward:F2} | Total: {totalReward:F2} | ε: {epsilon:F2}");
-    }
-
-    private string GetActionName(ActionType action)
-    {
-        return action switch
-        {
-            ActionType.Up => "Up",
-            ActionType.Down => "Down",
-            ActionType.Left => "Left",
-            ActionType.Right => "Right",
-            ActionType.A => "A",
-            ActionType.B => "B",
-            _ => "Unknown"
-        };
-    }
-
-    private float GetEpsilon()
-    {
-        return 0.1f + (0.9f * MathF.Exp(-0.0001f * _memory.Count));
+            $"Action: {ActionExecutor.GetActionName(action)} | Reward: {reward:F2} | Total: {totalReward:F2} | ε: {epsilon:F2}");
     }
 
     private void UpdateState()
@@ -165,5 +135,10 @@ public class ExplorationAgent
         _currentState.PartyLevels = state.Party.Select(p => p.Level).ToList();
         _currentState.BattleWon = state.BattleWon;
         _currentState.InTrainerBattle = state.InTrainerBattle;
+    }
+
+    private float GetEpsilon()
+    {
+        return 0.1f + (0.9f * MathF.Exp(-0.0001f * _memory.Count));
     }
 }
