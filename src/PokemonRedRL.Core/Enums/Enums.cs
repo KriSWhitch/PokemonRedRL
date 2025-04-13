@@ -17,4 +17,14 @@ namespace PokemonRedRL.Core.Enums
         ButtonUp = 0x40,
         ButtonDown = 0x80
     }
+
+    public enum ActionType
+    {
+        Up,     // 0
+        Down,   // 1
+        Left,   // 2
+        Right,  // 3
+        A,      // 4
+        B       // 5
+    }
 }

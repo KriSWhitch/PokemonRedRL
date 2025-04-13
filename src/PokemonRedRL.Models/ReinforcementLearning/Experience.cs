@@ -1,13 +1,14 @@
 ﻿using Parquet.Serialization.Attributes;
 using static TorchSharp.torch;
-using PokemonRedRL.Utils;
+using PokemonRedRL.Utils.Helpers;
+using PokemonRedRL.Core.Enums;
 
 namespace PokemonRedRL.Models.ReinforcementLearning;
 
 public class Experience
 {
     public byte[] StateBytes { get; set; }
-    public int Action { get; set; }
+    public ActionType Action { get; set; }
     public float Reward { get; set; }
     public byte[] NextStateBytes { get; set; }
     public bool Done { get; set; }

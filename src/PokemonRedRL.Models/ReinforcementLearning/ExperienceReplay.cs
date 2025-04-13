@@ -23,6 +23,13 @@ public class ExperienceReplay
 
     public List<Experience> Sample(int batchSize)
     {
-        return _buffer.OrderBy(_ => _random.Next()).Take(batchSize).ToList();
+        var indices = Enumerable.Range(0, _buffer.Count).ToList();
+        // Fisher-Yates shuffle
+        for (int i = indices.Count - 1; i > 0; i--)
+        {
+            int j = _random.Next(i + 1);
+            (indices[j], indices[i]) = (indices[i], indices[j]);
+        }
+        return indices.Take(batchSize).Select(i => _buffer[i]).ToList();
     }
 }

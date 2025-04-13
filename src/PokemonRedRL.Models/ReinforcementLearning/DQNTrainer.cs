@@ -1,6 +1,7 @@
 ﻿using static TorchSharp.torch;
 using TorchSharp;
 using static TorchSharp.torch.nn;
+using PokemonRedRL.Core.Enums;
 
 namespace PokemonRedRL.Models.ReinforcementLearning;
 
@@ -21,23 +22,17 @@ public class DQNTrainer
         _outputSize = outputSize;
     }
 
-    public int SelectAction(Tensor state, float epsilon)
+    public ActionType SelectAction(Tensor state, float epsilon)
     {
         // Генерация случайного числа для epsilon-greedy
         if (torch.rand(1).item<float>() < epsilon)
-        {
-            // Используем torch.tensor с явным указанием типа long
-            return (int)torch.tensor(new Random().Next(0, _outputSize),
-                    dtype: torch.int64).item<long>();
-        }
+            return (ActionType)new Random().Next(0, 6);
 
         // Действие на основе модели
         using (no_grad())
         {
-            // Добавляем batch-размерность и преобразуем в float
-            var input = state.unsqueeze(0).to(torch.float32);
-            var qValues = _model.Forward(input);
-            return (int)qValues.argmax().item<long>();
+            var qValues = _model.Forward(state);
+            return (ActionType)qValues.argmax().item<long>();
         }
     }
 
