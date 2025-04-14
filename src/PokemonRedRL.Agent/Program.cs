@@ -33,7 +33,7 @@ internal class Program
             })
             .Build();
 
-        const int NUMBER_OF_AGENTS = 5;
+        const int NUMBER_OF_AGENTS = 3;
 
         // 1. Сначала создаем и подключаем всех агентов
         var agents = new List<ExplorationAgent>();

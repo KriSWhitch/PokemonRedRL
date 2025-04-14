@@ -35,14 +35,22 @@ public class ExperienceParquetRepository : IDisposable
         Directory.CreateDirectory(_backupDir);
         Directory.CreateDirectory(_checkpointsDir);
 
+        // Создаем пустой файл, если не существует
+        if (!File.Exists(_filePath))
+        {
+            File.Create(_filePath).Dispose();
+        }
+
         _flushTimer = new Timer(_ => FlushBuffer(), null, TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(5));
     }
 
     public void AddExperience(Experience exp)
     {
+        if (exp == null) return;
+
         _buffer.Enqueue(exp);
         if (_buffer.Count > 1000)
-            Task.Run(FlushBuffer); // Запуск в фоне, чтобы не блокировать основной поток
+            Task.Run(FlushBuffer);
     }
 
     private void FlushBuffer()
@@ -54,10 +62,16 @@ public class ExperienceParquetRepository : IDisposable
         {
             var experiencesToSave = new List<Experience>();
             while (_buffer.TryDequeue(out var exp))
-                experiencesToSave.Add(exp);
+            {
+                if (exp != null)
+                    experiencesToSave.Add(exp);
+            }
+
+            if (!experiencesToSave.Any())
+                return;
 
             List<Experience> existingData = new();
-            if (File.Exists(_filePath))
+            if (File.Exists(_filePath) && new FileInfo(_filePath).Length > 0)
             {
                 using var readStream = File.OpenRead(_filePath);
                 existingData = ParquetSerializer.DeserializeAsync<Experience>(readStream).Result.ToList();
@@ -65,7 +79,6 @@ public class ExperienceParquetRepository : IDisposable
 
             existingData.AddRange(experiencesToSave);
 
-            // Создаем временный файл, затем заменяем основной (атомарная операция)
             string tempPath = Path.GetTempFileName();
             try
             {
@@ -73,7 +86,11 @@ public class ExperienceParquetRepository : IDisposable
                 {
                     ParquetSerializer.SerializeAsync(existingData, writeStream).Wait();
                 }
-                File.Replace(tempPath, _filePath, null);
+
+                if (File.Exists(_filePath))
+                    File.Delete(_filePath);
+
+                File.Move(tempPath, _filePath);
             }
             finally
             {
@@ -91,20 +108,20 @@ public class ExperienceParquetRepository : IDisposable
         }
     }
 
-    public async Task<List<Experience>> SampleAsync(int count = -1) // -1 означает "все"
+    public async Task<List<Experience>> SampleAsync(int count = -1)
     {
         await _fileSemaphore.WaitAsync();
         try
         {
-            if (!File.Exists(_filePath))
+            if (!File.Exists(_filePath) || new FileInfo(_filePath).Length == 0)
                 return new List<Experience>();
 
             using var stream = File.OpenRead(_filePath);
             var allData = await ParquetSerializer.DeserializeAsync<Experience>(stream);
 
             return count == -1
-                ? allData.ToList()
-                : allData.OrderBy(_ => Guid.NewGuid()).Take(count).ToList();
+                ? allData?.ToList() ?? new List<Experience>()
+                : allData?.OrderBy(_ => Guid.NewGuid()).Take(count).ToList() ?? new List<Experience>();
         }
         finally
         {
@@ -117,7 +134,8 @@ public class ExperienceParquetRepository : IDisposable
         await _fileSemaphore.WaitAsync();
         try
         {
-            if (!File.Exists(_filePath)) return;
+            if (!File.Exists(_filePath) || new FileInfo(_filePath).Length == 0)
+                return;
 
             string backupPath;
             do
@@ -127,7 +145,6 @@ public class ExperienceParquetRepository : IDisposable
 
             File.Copy(_filePath, backupPath);
 
-            // Очистка старых бэкапов
             var oldBackups = new DirectoryInfo(_backupDir)
                 .GetFiles()
                 .OrderByDescending(f => f.CreationTime)
@@ -140,7 +157,7 @@ public class ExperienceParquetRepository : IDisposable
                 {
                     if (old.Exists) old.Delete();
                 }
-                catch { /* Игнорируем ошибки удаления */ }
+                catch { /* Ignore */ }
             }
         }
         finally
@@ -151,44 +168,34 @@ public class ExperienceParquetRepository : IDisposable
 
     public void SaveCheckpoint(string checkpointName)
     {
-        // Глобальная блокировка для всех операций с чекпоинтами
         _globalCheckpointLock.Wait();
         try
         {
             RetryIOOperation(() =>
             {
+                if (!File.Exists(_filePath) || new FileInfo(_filePath).Length == 0)
+                    return;
+
                 var checkpointPath = Path.Combine(_checkpointsDir, $"{checkpointName}.parquet");
-                var tempCheckpointPath = Path.Combine(_checkpointsDir, $"temp_{Guid.NewGuid()}.parquet");
+                var tempPath = Path.GetTempFileName();
 
                 try
                 {
-                    // 1. Сначала сохраняем во временный файл
-                    using (var sourceStream = new FileStream(
-                        _filePath,
-                        FileMode.Open,
-                        FileAccess.Read,
-                        FileShare.ReadWrite)) // Разрешаем параллельное чтение
+                    using (var source = File.OpenRead(_filePath))
+                    using (var dest = File.Create(tempPath))
                     {
-                        using (var destStream = File.Create(tempCheckpointPath))
-                        {
-                            sourceStream.CopyTo(destStream);
-                        }
+                        source.CopyTo(dest);
                     }
 
-                    // 2. Атомарная замена файла
                     if (File.Exists(checkpointPath))
-                    {
                         File.Delete(checkpointPath);
-                    }
-                    File.Move(tempCheckpointPath, checkpointPath);
+
+                    File.Move(tempPath, checkpointPath);
                 }
                 finally
                 {
-                    // 3. Очистка временного файла, если что-то пошло не так
-                    if (File.Exists(tempCheckpointPath))
-                    {
-                        File.Delete(tempCheckpointPath);
-                    }
+                    if (File.Exists(tempPath))
+                        File.Delete(tempPath);
                 }
             });
         }
@@ -200,42 +207,40 @@ public class ExperienceParquetRepository : IDisposable
 
     public void LoadCheckpoint(string checkpointName)
     {
-        // Глобальная блокировка для всех операций с чекпоинтами
         _globalCheckpointLock.Wait();
         try
         {
             RetryIOOperation(() =>
             {
                 var checkpointPath = Path.Combine(_checkpointsDir, $"{checkpointName}.parquet");
-
                 if (!File.Exists(checkpointPath))
                     return;
 
-                // 1. Читаем данные из чекпоинта в память
                 List<Experience> data;
-                using (var stream = new FileStream(
-                    checkpointPath,
-                    FileMode.Open,
-                    FileAccess.Read,
-                    FileShare.ReadWrite)) // Разрешаем параллельное чтение
+                using (var stream = File.OpenRead(checkpointPath))
                 {
                     data = ParquetSerializer.DeserializeAsync<Experience>(stream).Result.ToList();
                 }
 
-                // 2. Записываем в основной файл
-                using (var stream = new FileStream(
-                    _filePath,
-                    FileMode.Create,
-                    FileAccess.Write,
-                    FileShare.None)) // Эксклюзивный доступ
+                var tempPath = Path.GetTempFileName();
+                try
                 {
-                    ParquetSerializer.SerializeAsync(data, stream).Wait();
+                    using (var stream = File.Create(tempPath))
+                    {
+                        ParquetSerializer.SerializeAsync(data, stream).Wait();
+                    }
+
+                    if (File.Exists(_filePath))
+                        File.Delete(_filePath);
+
+                    File.Move(tempPath, _filePath);
+                }
+                finally
+                {
+                    if (File.Exists(tempPath))
+                        File.Delete(tempPath);
                 }
             });
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
         }
         finally
         {
@@ -251,7 +256,7 @@ public class ExperienceParquetRepository : IDisposable
         }
         catch (IOException) when (retryCount < MAX_RETRIES)
         {
-            Thread.Sleep(RETRY_DELAY_MS);
+            Thread.Sleep(RETRY_DELAY_MS * (retryCount + 1));
             RetryIOOperation(action, retryCount + 1);
         }
     }
@@ -260,6 +265,7 @@ public class ExperienceParquetRepository : IDisposable
     {
         _flushTimer?.Dispose();
         FlushBuffer();
+        _fileSemaphore.Dispose();
         GC.SuppressFinalize(this);
     }
 }
