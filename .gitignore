@@ -13,3 +13,7 @@ obj/
 # NuGet
 packages/
 *.nupkg
+
+# Lua
+
+additional_scripts/
