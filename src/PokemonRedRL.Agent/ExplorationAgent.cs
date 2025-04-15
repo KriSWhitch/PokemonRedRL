@@ -1,8 +1,9 @@
-﻿using PokemonRedRL.Core.Emulator;
-using PokemonRedRL.Core.Helpers;
+﻿using PokemonRedRL.Core.Helpers;
 using PokemonRedRL.Core.Interfaces;
 using PokemonRedRL.DAL.Models;
 using PokemonRedRL.Models.Experience;
+using PokemonRedRL.Models.ReinforcementLearning;
+using PokemonRedRL.Models.Services;
 using PokemonRedRL.Utils.Enums;
 
 namespace PokemonRedRL.Agent;
@@ -10,47 +11,48 @@ namespace PokemonRedRL.Agent;
 public class ExplorationAgent
 {
     private readonly IEmulatorClient _emulator;
-    private readonly DQNTrainer _trainer;
-    private readonly ExperienceReplay _memory;
     private readonly GameState _currentState = new();
 
     // services
     private readonly IRewardCalculatorService _rewardCalculatorService;
     private readonly IStatePreprocessorService _statePreprocessorService;
+    private readonly IExperienceRepository _expRepo;
 
     private const float Gamma = 0.99f;
     private const int BatchSize = 32;
-    private const int MemoryCapacity = 10000;
+    private readonly MemoryCache _sessionCache = new(10_000); // Увеличенный кэш
+    private List<ModelExperience> _globalExperience = new();
+
+    private readonly RedisPrioritizedExperience _memory;
+    private readonly DQNTrainer _trainer;
+    private readonly float _epsilonStart = 1.0f;
+    private readonly float _epsilonEnd = 0.01f;
+    private readonly float _epsilonDecay = 0.9995f;
+
     // Input structure:
     // [HP, MapID, X, Y, Direction, Badges, InTrainerBattle, Money, PartyLevels[0-5]]
     private const int InputSize = 14;
     private const int OutputSize = 6; // 6 действий
 
-    private readonly ExperienceParquetRepository _expRepo;
-    private DateTime _lastBackupTime = DateTime.MinValue;
-
     public ExplorationAgent(IEmulatorClient emulator, 
         IRewardCalculatorService rewardCalculatorService,
-        IStatePreprocessorService statePreprocessorService)
+        IStatePreprocessorService statePreprocessorService,
+        IExperienceRepository expRepo)
     {
         _emulator = emulator;
         _rewardCalculatorService = rewardCalculatorService;
         _statePreprocessorService = statePreprocessorService;
+        _expRepo = expRepo;
 
-        _trainer = new DQNTrainer(InputSize, OutputSize);
-        _memory = new ExperienceReplay(MemoryCapacity);
-        _expRepo = new ExperienceParquetRepository();
-
-        // Загрузка начального опыта
-        _ = LoadInitialExperienceAsync();
-
-        // Загрузка последнего чекпоинта при старте
-        _expRepo.LoadCheckpoint("latest");
+        _trainer = new DQNTrainer("localhost:6379", InputSize, OutputSize);
+        _memory = new RedisPrioritizedExperience("localhost:6379");
     }
 
     public async Task RunEpisodeAsync()
     {
         Console.WriteLine($"Starting agent on port {_emulator.CurrentPort}");
+
+        await LoadInitialExperienceAsync();
 
         UpdateState();
         var totalReward = 0f;
@@ -72,43 +74,46 @@ public class ExplorationAgent
 
             var nextStateTensor = _statePreprocessorService.StateToTensor(_currentState);
 
-            if (_memory.Count > BatchSize)
-            {
-                _trainer.TrainStep(_memory.Sample(BatchSize), Gamma);
-            }
-
             LogProgress(action, reward, totalReward, epsilon);
 
-            // Сохранение опыта
-            _expRepo.AddExperience(new Experience
+            // Комбинированная выборка:
+            var batch = _sessionCache.Sample(BatchSize / 2)
+                .Concat(_globalExperience
+                    .OrderBy(_ => Guid.NewGuid())
+                    .Take(BatchSize / 2))
+                .ToList();
+
+            if (batch.Any())
+            {
+                _trainer.TrainStepWithPriorities(batch);
+            }
+
+            var experience = new ModelExperience
             {
                 State = stateTensor,
                 Action = action,
                 Reward = reward,
                 NextState = nextStateTensor,
                 Done = false
-            });
+            };
 
-            // Резервное копирование каждые 6 минут
-            if ((DateTime.Now - _lastBackupTime).TotalMinutes >= 6)
+            // Сохранение опыта в сессии
+            _sessionCache.Add(experience);
+            await _expRepo.AddAsync(experience);
+
+            // Периодическое обновление глобальной выборки
+            if (_sessionCache.Count % 1000 == 0)
             {
-                await _expRepo.CreateBackupAsync();
-                _expRepo.SaveCheckpoint("latest");
-                _lastBackupTime = DateTime.Now;
+                _globalExperience = await _expRepo.SampleAsync(50_000);
             }
         }
     }
 
     private async Task LoadInitialExperienceAsync()
     {
-        var samples = await _expRepo.SampleAsync(-1);
-
-        // Логируем сколько загрузили
-        Console.WriteLine($"Loaded {samples.Count} experiences from base file");
-
-        foreach (var s in samples.Where(s => s != null))
+        if (!_globalExperience.Any())
         {
-            _memory.Push(s);
+            _globalExperience = await _expRepo.SampleAsync(50_000); // -1 = все данные
         }
     }
 
@@ -135,10 +140,12 @@ public class ExplorationAgent
         _currentState.PartyLevels = state.Party.Select(p => p.Level).ToList();
         _currentState.BattleWon = state.BattleWon;
         _currentState.InTrainerBattle = state.InTrainerBattle;
+        _currentState.Party = state.Party;
     }
 
     private float GetEpsilon()
     {
-        return 0.1f + (0.9f * MathF.Exp(-0.0001f * _memory.Count));
+        return _epsilonEnd + (_epsilonStart - _epsilonEnd) *
+               MathF.Exp(-1.0f * _trainer.TrainStepCount * _epsilonDecay);
     }
 }

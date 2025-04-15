@@ -1,8 +1,10 @@
-﻿namespace PokemonRedRL.Models.Experience;
+﻿using PokemonRedRL.Models.Experience;
+
+namespace PokemonRedRL.Models.Services;
 
 public class ExperienceReplay
 {
-    private readonly List<Experience> _buffer;
+    private readonly List<ModelExperience> _buffer;
     private readonly int _capacity;
     private readonly Random _random = new();
 
@@ -11,17 +13,17 @@ public class ExperienceReplay
     public ExperienceReplay(int capacity)
     {
         _capacity = capacity;
-        _buffer = new List<Experience>(capacity);
+        _buffer = new List<ModelExperience>(capacity);
     }
 
-    public void Push(Experience experience)
+    public void Push(ModelExperience experience)
     {
         if (_buffer.Count >= _capacity)
             _buffer.RemoveAt(0);
         _buffer.Add(experience);
     }
 
-    public List<Experience> Sample(int batchSize)
+    public List<ModelExperience> Sample(int batchSize)
     {
         var indices = Enumerable.Range(0, _buffer.Count).ToList();
         // Fisher-Yates shuffle

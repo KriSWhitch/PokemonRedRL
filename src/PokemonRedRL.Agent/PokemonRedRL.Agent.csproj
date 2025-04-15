@@ -18,6 +18,7 @@
     <ProjectReference Include="..\PokemonRedRL.Core\PokemonRedRL.Core.csproj" />
     <ProjectReference Include="..\PokemonRedRL.DAL\PokemonRedRL.DAL.csproj" />
     <ProjectReference Include="..\PokemonRedRL.Models\PokemonRedRL.Models.csproj" />
+    <ProjectReference Include="..\PokemonRedRL.Utils\PokemonRedRL.Utils.csproj" />
   </ItemGroup>
 
 </Project>
