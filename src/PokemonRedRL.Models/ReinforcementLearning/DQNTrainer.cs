@@ -5,6 +5,7 @@ using PokemonRedRL.Utils.Enums;
 using PokemonRedRL.Models.Experience;
 using static TorchSharp.torch.optim;
 using PokemonRedRL.Models.Services;
+using TorchSharp.Modules;
 
 namespace PokemonRedRL.Models.ReinforcementLearning;
 
@@ -13,31 +14,39 @@ public class DQNTrainer
     private PokeDQN _model;
     private PokeDQN _targetModel;
     private optim.Optimizer _optimizer;
+    private readonly torch.Device _device;
     private int _trainStepCount;
     private readonly int _outputSize;
-    private readonly float _learningRate;
     private readonly float _gamma = 0.99f;
-    private readonly RedisPrioritizedExperience _redisExp;
-    private readonly torch.Device _device;
+    private readonly float _learningRate;
+    private readonly IExperienceRepository _expRepo;
+    private readonly ParameterServer _paramServer;
+    private readonly AdaptiveLRScheduler _lrScheduler;
+
     private const int MinibatchSize = 32;
+    private int _syncInterval = 100; // Синхронизация каждые 100 шагов
+    private float _smoothedReward = 0f;
+    private const float SMOOTHING_FACTOR = 0.9f;
 
     public int TrainStepCount { get => _trainStepCount; private set => _trainStepCount = value; }
 
     private lr_scheduler.LRScheduler _scheduler;
 
-    public DQNTrainer(string redisConnection, int inputSize, int outputSize, float learningRate = 0.001f, torch.Device device = null)
+    public DQNTrainer(string redisConnection, int inputSize, int outputSize, IExperienceRepository expRepo, ParameterServer paramServer, AdaptiveLRScheduler lrScheduler, float learningRate = 0.001f, torch.Device device = null)
     {
         _device = device ?? (torch.cuda.is_available() ? torch.CUDA : torch.CPU);
         Console.WriteLine($"Using device: {_device}");
 
         _model = new PokeDQN(inputSize, outputSize).to(_device);
         _targetModel = new PokeDQN(inputSize, outputSize).to(_device);
-        _redisExp = new RedisPrioritizedExperience(redisConnection);
+        _expRepo = expRepo;
         _targetModel.load_state_dict(_model.state_dict());
         _optimizer = optim.Adam(_model.parameters(), learningRate);
         _outputSize = outputSize;
         _learningRate = learningRate;
         _scheduler = torch.optim.lr_scheduler.StepLR(_optimizer, 100000, 0.1);
+        _paramServer = paramServer;
+        _lrScheduler = lrScheduler;
     }
 
     public ActionType SelectAction(Tensor state, float epsilon)
@@ -52,50 +61,25 @@ public class DQNTrainer
         }
     }
 
-    public void TrainStepWithPriorities(List<ModelExperience> batch)
+    public async Task<float[]> TrainStepWithPriorities(List<ModelExperience> batch)
     {
-        try
+        using (var scope = torch.NewDisposeScope())
         {
-            // Проверка на дубликаты
-            var duplicateIds = batch
+            var uniqueBatch = batch
                 .GroupBy(x => x.Id)
-                .Where(g => g.Count() > 1)
-                .Select(g => g.Key)
+                .Select(g => g.First())
                 .ToList();
 
-            if (duplicateIds.Any())
-            {
-                Console.WriteLine($"Warning: Found {duplicateIds.Count} duplicate IDs in batch");
-            }
+            var tdErrors = CalculateTdErrors(uniqueBatch);
 
-            // Вычисление TD-ошибок
-            var tdErrors = CalculateTdErrors(batch);
+            var updates = uniqueBatch
+                .Select((exp, i) => (exp.Id, Priority: Math.Abs(tdErrors[i])))
+                .ToDictionary(x => x.Id, x => x.Priority);
 
-            // Создание словаря с обработкой дубликатов
-            var updates = new Dictionary<Guid, float>();
-            for (int i = 0; i < batch.Count; i++)
-            {
-                var id = batch[i].Id;
-                var priority = Math.Abs(tdErrors[i]);
+            TrainStep(uniqueBatch, _gamma);
 
-                if (updates.ContainsKey(id))
-                {
-                    Console.WriteLine($"Duplicate ID found: {id}, averaging priorities");
-                    updates[id] = (updates[id] + priority) / 2; // Усредняем приоритеты
-                }
-                else
-                {
-                    updates[id] = priority;
-                }
-            }
-
-            _redisExp.UpdatePriorities(updates);
-            TrainStep(batch, _gamma);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in TrainStepWithPriorities: {ex}");
-            throw;
+            await SyncWithGlobalModel();
+            return tdErrors;
         }
     }
 
@@ -131,7 +115,8 @@ public class DQNTrainer
                 var actions = torch.tensor(
                     batch.Select(e => (long)e.Action).ToArray(),
                     dtype: torch.int64,
-                    device: _device).unsqueeze(1);
+                    device: _device
+                ).unsqueeze(-1); // [batch_size, 1]
 
                 var rewards = torch.tensor(
                     batch.Select(e => e.Reward).ToArray(),
@@ -156,10 +141,13 @@ public class DQNTrainer
                         .squeeze();
                 }
 
-                var targetQ = rewards + gamma * nextQ * (1 - dones.to(torch.float32));
-                var currentQ = _model.Forward(states).gather(1, actions).squeeze();
+                var currentQ = _model.Forward(states).gather(1, actions).squeeze(-1); // [batch_size]
+                currentQ = currentQ.unsqueeze(-1); // [batch_size, 1]
 
-                var loss = (weights * functional.mse_loss(currentQ, targetQ, reduction: Reduction.None)).mean();
+                var targetQ = rewards + gamma * nextQ * (1 - dones.to(torch.float32));
+                targetQ = targetQ.unsqueeze(-1); // Добавляем размерность, если нужно
+
+                var loss = functional.mse_loss(currentQ, targetQ, reduction: Reduction.None).mean();
 
                 _optimizer.zero_grad();
                 loss.backward();
@@ -180,72 +168,84 @@ public class DQNTrainer
         }
     }
 
+    public void TrackEpisodeReward(float episodeReward)
+    {
+        _smoothedReward = SMOOTHING_FACTOR * _smoothedReward + (1 - SMOOTHING_FACTOR) * episodeReward;
+        _lrScheduler.Update(_smoothedReward);
+        UpdateOptimizerLR();
+        _lrScheduler.SaveState(); // Сохраняем состояние после каждого эпизода
+    }
+
+    private void UpdateOptimizerLR()
+    {
+        foreach (var paramGroup in _optimizer.ParamGroups)
+        {
+            paramGroup.LearningRate = _lrScheduler.CurrentLR;
+        }
+    }
+
     private float[] CalculateTdErrors(List<ModelExperience> batch)
     {
         if (batch == null || batch.Count == 0)
             return Array.Empty<float>();
 
-        var tdErrors = new float[batch.Count];
-
-        Tensor states = null;
-        Tensor nextStates = null;
-        Tensor actions = null;
-        Tensor currentQValues = null;
-        Tensor gatheredQ = null;
-        Tensor nextQValues = null;
-        Tensor nextQValuesMax = null;
-        Tensor nextQValuesIndices = null;
-
-        try
+        using (var scope = torch.NewDisposeScope())
         {
-            // 1. Подготовка тензоров
-            var stateList = batch.Select(e => e.State.clone().to(_device)).ToList();
-            var nextStateList = batch.Select(e => e.NextState.clone().to(_device)).ToList();
+            // 1. Получаем тензоры
+            var states = torch.stack(batch.Select(e => e.State.to(_device)));
+            var nextStates = torch.stack(batch.Select(e => e.NextState.to(_device)));
+            var actions = torch.tensor(batch.Select(e => (long)e.Action).ToArray(), device: _device).unsqueeze(-1);
+            var rewards = torch.tensor(batch.Select(e => e.Reward).ToArray(), device: _device);
+            var dones = torch.tensor(batch.Select(e => e.Done ? 1L : 0L).ToArray(), dtype: torch.int64, device: _device);
 
-            states = torch.stack(stateList);
-            nextStates = torch.stack(nextStateList);
-
-            actions = torch.tensor(
-                batch.Select(e => (long)e.Action).ToArray(),
-                dtype: torch.int64,
-                device: _device).unsqueeze(1);
-
-            // 2. Вычисления в no_grad
             using (no_grad())
             {
-                currentQValues = _model.Forward(states);
-                gatheredQ = currentQValues.gather(1, actions);
-                var currentQ = gatheredQ.squeeze().data<float>().ToArray();
+                // 2. Вычисляем currentQ с правильной размерностью
+                var currentQ = _model.Forward(states)
+                    .gather(1, actions) // [batch_size, 1]
+                    .squeeze(-1); // [batch_size]
 
-                nextQValues = _targetModel.Forward(nextStates);
-                (nextQValuesMax, nextQValuesIndices) = nextQValues.max(1);
-                var nextQ = nextQValuesMax.data<float>().ToArray();
+                // 3. Вычисляем targetQ и приводим к размерности [batch_size]
+                var nextQ = _targetModel.Forward(nextStates).max(1).values;
+                var targetQ = rewards + _gamma * nextQ * (1 - dones.to(torch.float32));
 
-                // 3. Вычисление TD-ошибок
-                for (int i = 0; i < batch.Count; i++)
-                {
-                    tdErrors[i] = batch[i].Reward + _gamma * nextQ[i] * (batch[i].Done ? 0 : 1) - currentQ[i];
-                }
+                // 4. Проверка размерностей
+                if (currentQ.dim() != targetQ.dim())
+                    currentQ = currentQ.unsqueeze(-1);
+
+                // 5. Вычисляем TD-ошибки
+                var tdErrors = (targetQ - currentQ).abs().data<float>().ToArray();
+                return tdErrors;
             }
         }
-        catch (Exception ex)
+    }
+
+    public async Task SyncWithGlobalModel()
+    {
+        if (_trainStepCount % _syncInterval != 0) return;
+
+        // Получаем глобальные веса
+        var globalStateDict = await _paramServer.PullStateDict();
+        if (globalStateDict != null)
         {
-            Console.WriteLine($"TD Error calculation failed: {ex}");
-            Array.Fill(tdErrors, 1.0f);
-        }
-        finally
-        {
-            // 4. Освобождение ресурсов в правильном порядке
-            nextQValuesIndices?.Dispose();
-            nextQValuesMax?.Dispose();
-            nextQValues?.Dispose();
-            gatheredQ?.Dispose();
-            currentQValues?.Dispose();
-            actions?.Dispose();
-            nextStates?.Dispose();
-            states?.Dispose();
+            // Загружаем веса в модели
+            using (var scope = torch.NewDisposeScope())
+            {
+                _model.load_state_dict(globalStateDict);
+                _targetModel.load_state_dict(globalStateDict);
+            }
+
+            // Освобождаем ресурсы
+            foreach (var tensor in globalStateDict.Values)
+                tensor.Dispose();
         }
 
-        return tdErrors;
+        // Сохраняем текущие веса
+        var currentStateDict = _model.state_dict();
+        await _paramServer.PushStateDict(currentStateDict);
+
+        // Освобождаем ресурсы текущего state_dict
+        foreach (var tensor in currentStateDict.Values)
+            tensor.Dispose();
     }
 }

@@ -1,14 +1,18 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using PokemonRedRL.Core.Emulator;
 using PokemonRedRL.Core.Helpers;
 using PokemonRedRL.Core.Interfaces;
 using PokemonRedRL.Core.Services;
 using PokemonRedRL.Models.Configuration;
+using PokemonRedRL.Models.ReinforcementLearning;
 using PokemonRedRL.Models.Services;
 using PokemonRedRL.Utils.Helpers;
 using PokemonRedRL.Utils.Services;
 using StackExchange.Redis;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace PokemonRedRL.Agent;
 
@@ -20,13 +24,28 @@ internal class Program
         var host = Host.CreateDefaultBuilder(args)
             .ConfigureServices(services =>
             {
+                services.AddLogging(logging =>
+                {
+                    logging.AddConsole();
+                    logging.AddDebug();
+                    logging.SetMinimumLevel(LogLevel.Debug);
+                });
+
                 services.AddSingleton<NetworkConfigFactory>();
-
-                services.AddSingleton<RedisPrioritizedExperience>(provider =>
-                    new RedisPrioritizedExperience("localhost:6379"));
-
+                services.AddSingleton<ParameterServer>();
+                services.AddSingleton<RedisConfig>(new RedisConfig());
                 services.AddSingleton<ConnectionMultiplexer>(provider =>
                     ConnectionMultiplexer.Connect("localhost:6379"));
+                services.AddSingleton<AdaptiveLRScheduler>(provider =>
+                {
+                    var paramServer = provider.GetRequiredService<ParameterServer>();
+                    return new AdaptiveLRScheduler(
+                        baseLR: 0.001f,
+                        windowSize: 20,
+                        paramServer: paramServer // Передаем ParameterServer
+                    );
+                });
+
 
                 services.AddHostedService<RedisMaintenanceService>();
 
@@ -34,34 +53,23 @@ internal class Program
                 services.AddScoped<NetworkConfig>(provider =>
                     provider.GetRequiredService<NetworkConfigFactory>().Create()
                 );
-
-                services.AddScoped<IExperienceRepository>(provider =>
-                    new RedisExperienceRepository(
-                        new RedisConfig
-                        {
-                            BackupDir = "D:/Programming/PokemonRedRL/src/data/models/backups",
-                            CheckpointsDir = "D:/Programming/PokemonRedRL/src/data/models/checkpoints"
-                        }));
-
+                services.AddScoped<IExperienceRepository>(provider => new RedisExperienceRepository(new RedisConfig()));
                 services.AddScoped<ConnectionManager>();
                 services.AddScoped<SocketProtocol>();
                 services.AddScoped<GameStateSerializer>();
                 services.AddScoped<ExplorationAgent>();
-
                 services.AddScoped<IEmulatorClient, MGBAEmulatorClient>();
                 services.AddScoped<IRewardCalculatorService, RewardCalculatorService>();
                 services.AddScoped<IStatePreprocessorService, StatePreprocessorService>();
-
-                services.AddSingleton<RedisConfig>(new RedisConfig
-                {
-                    BackupDir = "D:/Programming/PokemonRedRL/src/data/models/backups",
-                    CheckpointsDir = "D:/Programming/PokemonRedRL/src/data/models/checkpoints"
-                });
                 services.AddSingleton<IExperienceRepository, RedisExperienceRepository>();
             })
-            .Build();
+        .Build();
 
-        const int NUMBER_OF_AGENTS = 5;
+        using var scope = host.Services.CreateScope();
+        var lrScheduler = scope.ServiceProvider.GetRequiredService<AdaptiveLRScheduler>();
+        await lrScheduler.LoadStateAsync(); // Вызов после регистрации
+
+        const int NUMBER_OF_AGENTS = 6;
 
         // Оптимальное количество потоков (можно настроить под вашу систему)
         var maxDegreeOfParallelism = Environment.ProcessorCount * 2;
@@ -82,8 +90,8 @@ internal class Program
             // 1. Инициализация агентов с балансировкой
             for (int i = 0; i < NUMBER_OF_AGENTS; i++)
             {
-                using var scope = host.Services.CreateScope();
-                var agent = scope.ServiceProvider.GetRequiredService<ExplorationAgent>();
+                using var agentScope = host.Services.CreateScope();
+                var agent = agentScope.ServiceProvider.GetRequiredService<ExplorationAgent>();
                 agents.Add(agent);
 
                 Console.WriteLine($"Agent {i + 1} initialized");
@@ -96,10 +104,7 @@ internal class Program
                         while (!cts.Token.IsCancellationRequested)
                         {
                             Console.WriteLine($"Agent {agent.GetHashCode()} starting new episode");
-                            await agent.RunEpisodeAsync().ConfigureAwait(false);
-
-                            // Небольшая пауза между эпизодами
-                            await Task.Delay(100, cts.Token);
+                            await agent.RunEpisodeAsync(cts);
                         }
                     }
                     catch (OperationCanceledException)
