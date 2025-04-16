@@ -38,7 +38,7 @@ public class ModelExperience
 
     public ModelExperience()
     {
-        _id = Guid.NewGuid(); // Гарантированная инициализация
+        Id = Guid.NewGuid(); // Гарантированная инициализация
     }
 
     [ParquetIgnore]

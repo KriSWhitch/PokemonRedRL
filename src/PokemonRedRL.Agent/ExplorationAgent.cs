@@ -1,4 +1,5 @@
-﻿using PokemonRedRL.Core.Helpers;
+﻿using System.Collections.Generic;
+using PokemonRedRL.Core.Helpers;
 using PokemonRedRL.Core.Interfaces;
 using PokemonRedRL.DAL.Models;
 using PokemonRedRL.Models.Experience;
@@ -33,6 +34,7 @@ public class ExplorationAgent
     private readonly float _epsilonDecay = 0.9995f;
 
     private List<ModelExperience> _initialBatch = new();
+    private HashSet<string> visitedLocations = new HashSet<string>();
 
     public ExplorationAgent(IEmulatorClient emulator, 
         IRewardCalculatorService rewardCalculatorService,
@@ -61,18 +63,17 @@ public class ExplorationAgent
             {
                 var tdErrors = await _trainer.TrainStepWithPriorities(_initialBatch);
                 await _expRepo.UpdatePrioritiesAsync(
-                    _initialBatch.Zip(tdErrors, (exp, err) =>
-                        new { exp.Id, Priority = Math.Abs(err) })
-                    .ToDictionary(x => x.Id, x => x.Priority)
+                    _initialBatch.Zip(tdErrors, (exp, err) => (exp.Id, Priority: Math.Abs(err)))
+                                 .GroupBy(x => x.Id)
+                                 .ToDictionary(g => g.Key, g => g.First().Priority)
                 );
                 _initialBatch.Clear();
             }
 
             UpdateState();
-            const int MAX_EPISODE_STEPS = 1000; // Пример: эпизод длится 1000 шагов
+            const int MAX_EPISODE_STEPS = 10000; // Пример: эпизод длится 10000 шагов
             float episodeReward = 0f;
             int stepCount = 0;
-            var visitedLocations = new HashSet<string>();
 
             try
             {
@@ -87,7 +88,7 @@ public class ExplorationAgent
                     UpdateState();
 
                     var isNewLocation = visitedLocations.Add(_currentState.UniqueLocation);
-                    var reward = _rewardCalculatorService.CalculateReward(_currentState, isNewLocation, prevMap, prevX, prevY);
+                    var reward = _rewardCalculatorService.CalculateReward(_currentState, isNewLocation);
                     episodeReward += reward;
 
                     LogProgress(action, reward, episodeReward, epsilon);
@@ -115,7 +116,7 @@ public class ExplorationAgent
 
     private async Task TrainWithAutoBatch()
     {
-        if (_trainer.TrainStepCount % 10 != 0) return;
+        if (_trainer.TrainStepCount % 500 != 0) return;
 
         var prioritized = await _expRepo.SamplePrioritizedAsync((int)(BatchSize * 0.7));
         var random = await _expRepo.SampleAsync(BatchSize - prioritized.Count);
@@ -164,6 +165,7 @@ public class ExplorationAgent
 
         _initialBatch = prioritized
             .Concat(random)
+            .DistinctBy(x => x.Id) // Убираем дубликаты по Id
             .OrderBy(_ => Guid.NewGuid())
             .ToList();
     }

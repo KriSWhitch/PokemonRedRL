@@ -6,6 +6,7 @@ using PokemonRedRL.Models.Experience;
 using static TorchSharp.torch.optim;
 using PokemonRedRL.Models.Services;
 using TorchSharp.Modules;
+using System.Collections.Concurrent;
 
 namespace PokemonRedRL.Models.ReinforcementLearning;
 
@@ -23,8 +24,7 @@ public class DQNTrainer
     private readonly ParameterServer _paramServer;
     private readonly AdaptiveLRScheduler _lrScheduler;
 
-    private const int MinibatchSize = 32;
-    private int _syncInterval = 100; // Синхронизация каждые 100 шагов
+    private int _syncInterval = 500; // Синхронизация каждые 100 шагов
     private float _smoothedReward = 0f;
     private const float SMOOTHING_FACTOR = 0.9f;
 
@@ -92,31 +92,23 @@ public class DQNTrainer
             // 1. Собираем тензоры с явным контролем жизненного цикла
             using (var scope = torch.NewDisposeScope())
             {
-                // 2. Создаем тензоры с явным указанием устройства
-                var stateList = batch.Select(e =>
+                // 1. Получаем тензоры
+                var statesBuffer = new ConcurrentBag<Tensor>();
+                var nextStatesBuffer = new ConcurrentBag<Tensor>();
+
+                Parallel.ForEach(batch, e =>
                 {
-                    var t = e.State.to(_device, copy: true);
-                    if (t.device != _device) t = t.to(_device, copy: true);
-                    return t;
-                }).ToList();
+                    statesBuffer.Add(e.State.to(_device, copy: false));
+                    nextStatesBuffer.Add(e.NextState.to(_device, copy: false));
+                });
 
-                var states = torch.stack(stateList).to(_device);
+                var states = torch.stack(statesBuffer.ToArray());
+                var nextStates = torch.stack(nextStatesBuffer.ToArray());
 
-                var nextStateList = batch.Select(e =>
-                {
-                    var t = e.NextState.to(_device, copy: true);
-                    if (t.device != _device) t = t.to(_device, copy: true);
-                    return t;
-                }).ToList();
-
-                var nextStates = torch.stack(nextStateList).to(_device);
+                var actionsArray = batch.Select(e => (long)e.Action).ToArray();
 
                 // 3. Создаем остальные тензоры
-                var actions = torch.tensor(
-                    batch.Select(e => (long)e.Action).ToArray(),
-                    dtype: torch.int64,
-                    device: _device
-                ).unsqueeze(-1); // [batch_size, 1]
+                var actions = torch.tensor(actionsArray, dtype: torch.int64, device: _device).unsqueeze(-1);
 
                 var rewards = torch.tensor(
                     batch.Select(e => e.Reward).ToArray(),
@@ -155,7 +147,7 @@ public class DQNTrainer
                 _optimizer.step();
                 _scheduler.step();
 
-                if (++_trainStepCount % 1000 == 0)
+                if (++_trainStepCount % _syncInterval == 0)
                 {
                     _targetModel.load_state_dict(_model.state_dict());
                 }
@@ -192,9 +184,20 @@ public class DQNTrainer
         using (var scope = torch.NewDisposeScope())
         {
             // 1. Получаем тензоры
-            var states = torch.stack(batch.Select(e => e.State.to(_device)));
-            var nextStates = torch.stack(batch.Select(e => e.NextState.to(_device)));
-            var actions = torch.tensor(batch.Select(e => (long)e.Action).ToArray(), device: _device).unsqueeze(-1);
+            var statesBuffer = new ConcurrentBag<Tensor>();
+            var nextStatesBuffer = new ConcurrentBag<Tensor>();
+
+            Parallel.ForEach(batch, e =>
+            {
+                statesBuffer.Add(e.State.to(_device, copy: false));
+                nextStatesBuffer.Add(e.NextState.to(_device, copy: false));
+            });
+
+            var actionsArray = batch.Select(e => (long)e.Action).ToArray();
+
+            var states = torch.stack(statesBuffer.ToArray());
+            var nextStates = torch.stack(nextStatesBuffer.ToArray());
+            var actions = torch.tensor(actionsArray, dtype: torch.int64, device: _device).unsqueeze(-1);
             var rewards = torch.tensor(batch.Select(e => e.Reward).ToArray(), device: _device);
             var dones = torch.tensor(batch.Select(e => e.Done ? 1L : 0L).ToArray(), dtype: torch.int64, device: _device);
 

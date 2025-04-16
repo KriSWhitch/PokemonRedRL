@@ -9,12 +9,12 @@ public class RewardCalculatorService: IRewardCalculatorService
     private int _previousMoney;
     private List<int> _previousLevels = new();
 
-    public float CalculateReward(GameState currentState, bool isNewLocation, int prevMap, int prevX, int prevY)
+    public float CalculateReward(GameState currentState, bool isNewLocation)
     {
         float reward = 0f;
 
         // Награды
-        reward += GetNewLocationReward(currentState, isNewLocation, prevMap, prevX, prevY);
+        reward += GetNewLocationReward(currentState, isNewLocation);
         reward += GetBadgeReward(currentState);
         reward += GetMoneyReward(currentState);
         reward += GetLevelUpReward(currentState);
@@ -26,17 +26,9 @@ public class RewardCalculatorService: IRewardCalculatorService
     }
 
 
-    private float GetNewLocationReward(GameState currentState, bool isNewLocation, int prevMap, int prevX, int prevY)
+    private float GetNewLocationReward(GameState currentState, bool isNewLocation)
     {
-        if (isNewLocation) return 1.0f;
-        if (currentState.MapId == prevMap
-            && currentState.X == prevX
-            && currentState.Y == prevY)
-        {
-            return -0.01f;
-        }
-
-        return 0f;
+        return isNewLocation ? 1.0f : 0f;
     }
 
     private float GetBadgeReward(GameState currentState)

@@ -1,4 +1,5 @@
-﻿using MessagePack;
+﻿using System.Collections.Concurrent;
+using MessagePack;
 using PokemonRedRL.Models.Configuration;
 using PokemonRedRL.Models.Experience;
 using StackExchange.Redis;
@@ -17,11 +18,13 @@ public class RedisExperienceRepository : IExperienceRepository, IDisposable
         var options = new ConfigurationOptions
         {
             EndPoints = { $"{config.Host}:{config.Port}" },
-            AsyncTimeout = config.TimeoutMs,
-            SyncTimeout = config.TimeoutMs / 2,
+            AsyncTimeout = 60_000, // 60 секунд
+            SyncTimeout = 30_000,
+            ConnectTimeout = 10_000,
             AbortOnConnectFail = false,
-            ConnectRetry = 3,
-            ConnectTimeout = 5000
+            ConnectRetry = 5,
+            KeepAlive = 180, // Поддержка долгих соединений
+            ClientName = "PokemonRedRL"
         };
 
         _redis = ConnectionMultiplexer.Connect(options);
@@ -30,17 +33,25 @@ public class RedisExperienceRepository : IExperienceRepository, IDisposable
 
     public async Task AddAsync(ModelExperience exp)
     {
-        // Сохраняем в Stream с автоматическим ID
-        var fields = new NameValueEntry[]
+        try
         {
+            // Сохраняем в Stream с автоматическим ID
+            var fields = new NameValueEntry[]
+            {
             new("id", exp.Id.ToString()),
             new("data", MessagePackSerializer.Serialize(exp)),
             new("priority", exp.Weight)
-        };
-        await _db.StreamAddAsync(MAIN_STREAM, fields, messageId: "*");
+            };
+            await _db.StreamAddAsync(MAIN_STREAM, fields, messageId: "*");
 
-        // Сохраняем приоритет в Sorted Set
-        await _db.SortedSetAddAsync("exp:priorities", exp.Id.ToString(), exp.Weight);
+            // Сохраняем приоритет в Sorted Set
+            await _db.SortedSetAddAsync("exp:priorities", exp.Id.ToString(), exp.Weight);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
     }
 
     public async Task<List<ModelExperience>> SamplePrioritizedAsync(int count)
@@ -71,19 +82,49 @@ public class RedisExperienceRepository : IExperienceRepository, IDisposable
         {
             return await SampleAsync(count);
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
     }
 
     public async Task<List<ModelExperience>> SampleAsync(int count = -1)
     {
-        var entries = await _db.StreamRangeAsync(
-            MAIN_STREAM,
-            count: count == -1 ? _config.BatchSize : count,
-            messageOrder: Order.Descending
-        );
+        try
+        {
+            const int PAGE_SIZE = 500; // Ограничиваем размер пачки
+            var entries = new List<StreamEntry>();
+            RedisValue lastId = "0-0"; // Начальный курсор
 
-        return entries
-            .Select(e => MessagePackSerializer.Deserialize<ModelExperience>(e["data"]))
-            .ToList();
+            while (true)
+            {
+                var page = await _db.StreamRangeAsync(
+                    MAIN_STREAM,
+                    minId: lastId,
+                    maxId: "+", // Все записи после lastId
+                    count: PAGE_SIZE,
+                    messageOrder: Order.Descending
+                );
+
+                if (page.Length == 0) break;
+
+                entries.AddRange(page);
+                lastId = page.Last().Id;
+
+                if (count != -1 && entries.Count >= count) break;
+            }
+
+            return entries
+                .Take(count == -1 ? _config.BatchSize : count)
+                .Select(e => MessagePackSerializer.Deserialize<ModelExperience>(e["data"]))
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"SampleAsync error: {ex.Message}");
+            return new List<ModelExperience>();
+        }
     }
 
     public async Task UpdatePrioritiesAsync(Dictionary<Guid, float> updates)
@@ -95,7 +136,13 @@ public class RedisExperienceRepository : IExperienceRepository, IDisposable
             foreach (var (id, priority) in updates)
             {
                 // Добавляем команду в транзакцию БЕЗ await
-                _ = transaction.SortedSetAddAsync("exp:priorities", id.ToString(), priority);
+                _ = transaction.SortedSetAddAsync(
+                    "exp:priorities",
+                    id.ToString(),
+                    priority,
+                    When.Always, // Всегда перезаписывать
+                    CommandFlags.FireAndForget
+                );
             }
 
             // Выполняем транзакцию
@@ -111,55 +158,6 @@ public class RedisExperienceRepository : IExperienceRepository, IDisposable
             Console.WriteLine($"Ошибка обновления приоритетов: {ex.Message}");
         }
     }
-
-    private async Task<StreamEntry?> FindEntryById(Guid id)
-    {
-        try
-        {
-            var entries = await _db.StreamRangeAsync(MAIN_STREAM);
-
-            // 3. Корректное преобразование RedisValue -> Guid
-            return entries.FirstOrDefault(e =>
-                e.Values.Any(v =>
-                    v.Name == "id" &&
-                    Guid.TryParse((string)v.Value, out var guid) &&
-                    guid == id
-                )
-            );
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    private List<ModelExperience> ParseSearchResult(RedisResult result)
-    {
-        var parsed = new List<ModelExperience>();
-        var items = (RedisResult[])result;
-
-        for (int i = 1; i < items.Length; i += 2)
-        {
-            var fields = new List<NameValueEntry>();
-            var entries = (RedisResult[])items[i + 1];
-
-            for (int j = 0; j < entries.Length; j += 2)
-            {
-                fields.Add(new NameValueEntry(
-                    (string)entries[j],
-                    (RedisValue)entries[j + 1]
-                ));
-            }
-
-            var data = fields.First(f => f.Name == "data").Value;
-            parsed.Add(MessagePackSerializer.Deserialize<ModelExperience>((byte[])data));
-        }
-
-        return parsed;
-    }
-
-    private byte[] Serialize(ModelExperience exp) => MessagePackSerializer.Serialize(exp);
-    private ModelExperience Deserialize(RedisValue value) => MessagePackSerializer.Deserialize<ModelExperience>(value);
 
     public void Dispose() => _redis?.Dispose();
 }

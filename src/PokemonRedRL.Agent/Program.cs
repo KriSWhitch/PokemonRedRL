@@ -69,7 +69,7 @@ internal class Program
         var lrScheduler = scope.ServiceProvider.GetRequiredService<AdaptiveLRScheduler>();
         await lrScheduler.LoadStateAsync(); // Вызов после регистрации
 
-        const int NUMBER_OF_AGENTS = 6;
+        const int NUMBER_OF_AGENTS = 10;
 
         // Оптимальное количество потоков (можно настроить под вашу систему)
         var maxDegreeOfParallelism = Environment.ProcessorCount * 2;
