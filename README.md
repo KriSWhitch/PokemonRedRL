@@ -25,6 +25,7 @@ This project implements a Reinforcement Learning (RL) agent that learns to play 
     ├── PokemonRedRL.Core       # Core emulator interaction logic
     │   ├── Emulator               
     │   └── Enums  
+    ├── PokemonRedRL.DAL        
     ├── PokemonRedRL.Models     # Neural network models and training
     ├── PokemonRedRL.Utils      # Helpers
     └── scripts
