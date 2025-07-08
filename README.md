@@ -2,6 +2,13 @@
 
 ![Pokémon Red](https://img.icons8.com/color/96/000000/pokeball--v1.png)
 
+<details>
+<summary><b>📺 Demo</b></summary>
+
+https://github.com/user-attachments/assets/f3ee559a-c1e2-43ba-a0c3-421530f84440
+
+</details>
+
 ## Project Overview
 
 This project implements a Reinforcement Learning (RL) agent that learns to play Pokémon Red (Game Boy) using the mGBA emulator. The system consists of three main components:
