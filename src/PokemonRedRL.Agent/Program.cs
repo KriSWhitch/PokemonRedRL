@@ -50,7 +50,6 @@ internal class Program
                 services.AddScoped<NetworkConfig>(provider =>
                     provider.GetRequiredService<NetworkConfigFactory>().Create()
                 );
-                services.AddScoped<IExperienceRepository>(provider => new RedisExperienceRepository(new RedisConfig()));
                 services.AddScoped<ConnectionManager>();
                 services.AddScoped<SocketProtocol>();
                 services.AddScoped<GameStateSerializer>();

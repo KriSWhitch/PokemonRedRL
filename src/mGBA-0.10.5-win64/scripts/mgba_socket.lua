@@ -1,5 +1,13 @@
-package.path = package.path .. ";D:\\Programming\\PokemonRedRL\\src\\mGBA-0.10.5-win64\\lua\\?.lua"
-package.cpath = package.cpath .. ";D:\\Programming\\PokemonRedRL\\src\\mGBA-0.10.5-win64\\lua\\?.dll"
+-- Resolve the lua/ library directory relative to this script's own location instead of a hardcoded absolute path
+local function scriptDir()
+    local source = debug.getinfo(1, "S").source
+    if source:sub(1, 1) == "@" then source = source:sub(2) end
+    return source:match("^(.*)[/\\][^/\\]+$") or "."
+end
+
+local SCRIPT_DIR = scriptDir()
+package.path = package.path .. ";" .. SCRIPT_DIR .. "\\..\\lua\\?.lua"
+package.cpath = package.cpath .. ";" .. SCRIPT_DIR .. "\\..\\lua\\?.dll"
 
 local socket = require("socket")
 local json = require("lunajson")

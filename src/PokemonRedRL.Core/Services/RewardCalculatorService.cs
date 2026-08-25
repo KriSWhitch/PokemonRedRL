@@ -20,7 +20,9 @@ public class RewardCalculatorService : IRewardCalculatorService
         reward += GetLevelUpReward(currentState);
         reward += GetBattleReward(currentState);
 
+        _previousBadges = currentState.Badges;
         _previousMoney = currentState.Money;
+        _previousLevels = new List<int>(currentState.PartyLevels);
 
         return reward / 10f; // Масштабирование для стабильности
     }
