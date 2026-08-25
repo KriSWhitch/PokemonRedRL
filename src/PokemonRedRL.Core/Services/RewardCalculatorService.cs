@@ -3,7 +3,7 @@ using PokemonRedRL.DAL.Models;
 
 namespace PokemonRedRL.Core.Services;
 
-public class RewardCalculatorService: IRewardCalculatorService
+public class RewardCalculatorService : IRewardCalculatorService
 {
     private int _previousBadges;
     private int _previousMoney;
@@ -45,9 +45,7 @@ public class RewardCalculatorService: IRewardCalculatorService
         if (moneyDiff > 0)
         {
             // Начисляем 0.01 очка за каждые 100 денег
-            float reward = moneyDiff * 0.0001f;
-            _previousMoney = currentState.Money; // Обновляем предыдущее значение
-            return reward;
+            return moneyDiff * 0.0001f;
         }
 
         return 0f; // Возвращаем 0 если денег не прибавилось или уменьшилось

@@ -14,7 +14,6 @@ public class MGBAEmulatorClient : IEmulatorClient
 
     public MGBAEmulatorClient(
         NetworkConfig config,
-        ConnectionManager connection,
         SocketProtocol protocol,
         GameStateSerializer serializer)
     {

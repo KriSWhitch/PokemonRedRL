@@ -7,12 +7,11 @@ using PokemonRedRL.Core.Helpers;
 using PokemonRedRL.Core.Interfaces;
 using PokemonRedRL.Core.Services;
 using PokemonRedRL.Models.Configuration;
+using PokemonRedRL.Models.Interfaces;
 using PokemonRedRL.Models.ReinforcementLearning;
 using PokemonRedRL.Models.Services;
 using PokemonRedRL.Utils.Helpers;
-using PokemonRedRL.Utils.Services;
 using StackExchange.Redis;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace PokemonRedRL.Agent;
 
@@ -46,9 +45,7 @@ internal class Program
                     );
                 });
 
-
                 services.AddHostedService<RedisMaintenanceService>();
-
 
                 services.AddScoped<NetworkConfig>(provider =>
                     provider.GetRequiredService<NetworkConfigFactory>().Create()

@@ -3,6 +3,7 @@ using TorchSharp;
 using static TorchSharp.torch.nn;
 using PokemonRedRL.Utils.Enums;
 using PokemonRedRL.Models.Experience;
+using PokemonRedRL.Models.Interfaces;
 using static TorchSharp.torch.optim;
 using PokemonRedRL.Models.Services;
 using TorchSharp.Modules;
@@ -24,7 +25,7 @@ public class DQNTrainer
     private readonly ParameterServer _paramServer;
     private readonly AdaptiveLRScheduler _lrScheduler;
 
-    private int _syncInterval = 500; // Синхронизация каждые 100 шагов
+    private int _syncInterval = 500; // Синхронизация каждые 500 шагов
     private float _smoothedReward = 0f;
     private const float SMOOTHING_FACTOR = 0.9f;
 

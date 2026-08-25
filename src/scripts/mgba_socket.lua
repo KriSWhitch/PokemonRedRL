@@ -15,8 +15,7 @@ local PLAYER_Y_ADDR = 0xD361
 local PLAYER_MAP_ADDR = 0xD35E  -- Текущая карта
 
 -- Constants
-
-local EMULATOR_FRAME_RATE = 60;
+local EMULATOR_FRAME_RATE = 60
 
 -- Коды кнопок
 local BUTTONS = {
@@ -43,7 +42,6 @@ local next_frame = EMULATOR_FRAME_RATE
 local reset_before_next_frame = 15
 
 -- функция получения текущей локации пользователя
-
 local function get_player_location()
     local x = emu:read8(PLAYER_X_ADDR)
     local y = emu:read8(PLAYER_Y_ADDR)
@@ -53,10 +51,10 @@ end
 
 -- Основной цикл (вызывается каждый кадр)
 local function frame_callback()
-    next_frame = next_frame - 1;
+    next_frame = next_frame - 1
 
     if next_frame < reset_before_next_frame & previous_input ~= 0 then
-        emu:clearKeys(previous_input) 
+        emu:clearKeys(previous_input)
         previous_input = 0
     end
 

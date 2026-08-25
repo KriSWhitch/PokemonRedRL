@@ -1,5 +1,7 @@
 ﻿using PokemonRedRL.Models.Experience;
 
+namespace PokemonRedRL.Models.Interfaces;
+
 public interface IExperienceRepository
 {
     Task AddAsync(ModelExperience exp);

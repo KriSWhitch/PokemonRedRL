@@ -3,11 +3,11 @@ using TorchSharp;
 using PokemonRedRL.Core.Interfaces;
 using PokemonRedRL.DAL.Models;
 
-namespace PokemonRedRL.Utils.Services;
+namespace PokemonRedRL.Core.Services;
 
 // todo: move all constants like 100f, 8f and others
 // in separate constants for EVERY normalization
-public class StatePreprocessorService: IStatePreprocessorService
+public class StatePreprocessorService : IStatePreprocessorService
 {
     const int MAX_MONEY = 999999; // Максимальное значение денег в Pokémon Red
 

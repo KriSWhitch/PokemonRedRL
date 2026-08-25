@@ -2,7 +2,10 @@
 using MessagePack;
 using PokemonRedRL.Models.Configuration;
 using PokemonRedRL.Models.Experience;
+using PokemonRedRL.Models.Interfaces;
 using StackExchange.Redis;
+
+namespace PokemonRedRL.Models.Services;
 
 public class RedisExperienceRepository : IExperienceRepository, IDisposable
 {

@@ -3,6 +3,7 @@ using PokemonRedRL.Core.Helpers;
 using PokemonRedRL.Core.Interfaces;
 using PokemonRedRL.DAL.Models;
 using PokemonRedRL.Models.Experience;
+using PokemonRedRL.Models.Interfaces;
 using PokemonRedRL.Models.ReinforcementLearning;
 using PokemonRedRL.Models.Services;
 using PokemonRedRL.Utils.Enums;
