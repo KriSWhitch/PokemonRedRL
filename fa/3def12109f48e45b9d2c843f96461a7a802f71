@@ -1,0 +1,79 @@
+.gitignore
+  s_f64b5f38c35d7d::t_ce2d0f22dfbe49 17-19
+.gitmodules
+  s_f64b5f38c35d7d::t_06ed02deba602a 1-3
+external/mgba
+  s_f64b5f38c35d7d::t_d9b258c2192501 1
+src/PokemonRedRL.ControlPanel/App.xaml
+  s_f64b5f38c35d7d::t_e12fc6f6d2c067 1-8
+src/PokemonRedRL.ControlPanel/App.xaml.cs
+  s_f64b5f38c35d7d::t_0c0bc3760a8305 1-38
+src/PokemonRedRL.ControlPanel/AssemblyInfo.cs
+  s_f64b5f38c35d7d::t_cc2d1bc7525c77 1-10
+src/PokemonRedRL.ControlPanel/MainWindow.xaml
+  s_f64b5f38c35d7d::t_4a993d088af7ab 1-104
+src/PokemonRedRL.ControlPanel/MainWindow.xaml.cs
+  s_f64b5f38c35d7d::t_0a66706bbbdd04 1-31
+src/PokemonRedRL.ControlPanel/PokemonRedRL.ControlPanel.csproj
+  s_f64b5f38c35d7d::t_505f196c2b2678 1-20
+src/PokemonRedRL.ControlPanel/ViewModels/MainViewModel.cs
+  s_f64b5f38c35d7d::t_8e72a717270cab 1-229
+src/PokemonRedRL.sln
+  s_f64b5f38c35d7d::t_79a769855c7682 16-17,88-99
+docs/CODEBASE_MAP.md
+  s_f64b5f38c35d7d::t_c34c3dc56ed0cb 5,73,94,105-106,136-157,190,204
+docs/PROJECT_OVERVIEW.md
+  s_f64b5f38c35d7d::t_7ff25e1fdd8b88 12,61,67-68
+docs/tasks/automated-mgba-launch-and-fast-forward.md
+  s_f64b5f38c35d7d::t_9083cfc0b3a264 1-161
+docs/tasks/roadmap-vision-and-rl-overhaul.md
+  s_f64b5f38c35d7d::t_5d70f4f117e187 19,23,55
+src/PokemonRedRL.Agent/ExplorationAgent.cs
+  s_f64b5f38c35d7d::t_925b3876ee15e2 2,179-186
+src/PokemonRedRL.Agent/Program.cs
+  s_f64b5f38c35d7d::t_e3416b94a0aa5b 22-27,56-71,87-142,145
+src/PokemonRedRL.ControlPanel/Models/AgentSlot.cs
+  s_f64b5f38c35d7d::t_f3ae7aebd14378 1-16
+src/PokemonRedRL.ControlPanel/Models/Enums.cs
+  s_f64b5f38c35d7d::t_20361d8b099d63 1-40
+src/PokemonRedRL.ControlPanel/Models/RunManifest.cs
+  s_f64b5f38c35d7d::t_2e4e66df5b708d 1-17
+src/PokemonRedRL.ControlPanel/Services/AgentProcessManager.cs
+  s_f64b5f38c35d7d::t_57f854e42d30a1 1-180
+src/PokemonRedRL.ControlPanel/Services/AgentTelemetryParser.cs
+  s_f64b5f38c35d7d::t_fc9cc995990d2c 1-38
+src/PokemonRedRL.ControlPanel/Services/EmulatorPingProbe.cs
+  s_f64b5f38c35d7d::t_c05b6a5d7cd140 1-45
+src/PokemonRedRL.ControlPanel/Services/PreviewCaptureService.cs
+  s_f64b5f38c35d7d::t_c35dfdea622d88 1-71
+src/PokemonRedRL.ControlPanel/Services/RunManifestService.cs
+  s_f64b5f38c35d7d::t_1daaf08faf547f 1-73
+src/PokemonRedRL.ControlPanel/Services/WindowEnumerationService.cs
+  s_f64b5f38c35d7d::t_58a4de042fc1ad 1-78
+src/PokemonRedRL.ControlPanel/ViewModels/AgentTileViewModel.cs
+  s_f64b5f38c35d7d::t_ac6474301a6698 1-72
+src/PokemonRedRL.ControlPanel/ViewModels/RelayCommand.cs
+  s_f64b5f38c35d7d::t_a2e8e1f86e0190 1-30
+src/PokemonRedRL.ControlPanel/ViewModels/ViewModelBase.cs
+  s_f64b5f38c35d7d::t_83fb6ce257d5f2 1-20
+src/PokemonRedRL.ControlPanel/Views/WindowPickerDialog.xaml
+  s_f64b5f38c35d7d::t_15a51c13e0e466 1-12
+src/PokemonRedRL.ControlPanel/Views/WindowPickerDialog.xaml.cs
+  s_f64b5f38c35d7d::t_169b636cfa4a5e 1-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "fa3def12109f48e45b9d2c843f96461a7a802f71",
+  "prompts": {},
+  "sessions": {
+    "s_f64b5f38c35d7d": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "3b50430e-8ac6-478f-942c-22b9c3a90253",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    }
+  }
+}
