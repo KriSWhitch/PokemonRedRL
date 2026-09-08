@@ -1,14 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="TorchSharp" Version="0.105.0" />
-    <PackageReference Include="TorchSharp-cuda-windows" Version="0.105.0" />
+    <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260627" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.13.0.20260627" />
+    <PackageReference Include="TorchSharp" Version="0.107.0" />
+    <PackageReference Include="TorchSharp-cuda-windows" Version="0.107.0" />
   </ItemGroup>
 
   <ItemGroup>

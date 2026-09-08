@@ -59,18 +59,18 @@ Each non-trivial task gets a committed plan file at `docs/tasks/<slug>.md` (crea
 
 ## Conventions actually used in this codebase
 
-- Target framework: **.NET 8.0**, `Nullable` and `ImplicitUsings` enabled in every `.csproj`.
+- Target framework: **.NET 10.0**, `Nullable` and `ImplicitUsings` enabled in every `.csproj`.
 - Dependency injection via `Microsoft.Extensions.Hosting` `Host.CreateDefaultBuilder` in `Program.cs`. New services should be registered there, following the existing `AddSingleton`/`AddScoped` pattern (services that hold per-agent/per-connection state are `Scoped`; shared infra like `ParameterServer`, `AdaptiveLRScheduler` are `Singleton`).
 - Interfaces live in an `Interfaces/` folder next to the code they abstract (`IEmulatorClient`, `IRewardCalculatorService`, `IStatePreprocessorService`, `IExperienceRepository`) and are implemented in a sibling `Services/`/`Emulator/` folder.
 - TorchSharp is used directly (`static TorchSharp.torch`, `TorchSharp.Modules`); tensors are created/disposed manually — watch for tensor leaks when editing training code (wrap in `using`/`DisposeScope` where reasonable instead of introducing new leaks).
 - The emulator protocol is a simple newline-terminated text command/response over a raw `TcpClient` (`SocketProtocol.SendCommand`). Any new command must be handled on both the C# side and the Lua side.
 - Existing code comments/log messages are a mix of Russian and English (the author's working language). Match the surrounding file's language when editing an existing block; new files/comments should default to concise English unless the user asks otherwise.
-- No automated test project currently exists in the solution. If you add meaningful logic, prefer adding a test project (`xUnit`, matching `net8.0`) rather than skipping verification.
+- No automated test project currently exists in the solution. If you add meaningful logic, prefer adding a test project (`xUnit`, matching `net10.0`) rather than skipping verification.
 - `src/data/roms/` (ROMs, `.sav`/`.ss*` save states) and model backups under `src/data/models/` are **intentionally committed** to this repo as working backups — do not add them to `.gitignore` or untrack them without explicit user confirmation.
 
 ## Build & run
 
-- Requires: .NET 8 SDK, a running Redis instance on `localhost:6379` (hardcoded in `Program.cs`/`RedisConfig`), mGBA 0.10.5 with `mgba_socket.lua` loaded against a Pokémon Red/FireRed ROM.
+- Requires: .NET 10 SDK, a running Redis instance on `localhost:6379` (hardcoded in `Program.cs`/`RedisConfig`), mGBA 0.10.5 with `mgba_socket.lua` loaded against a Pokémon Red/FireRed ROM.
 - Build: `dotnet build src/PokemonRedRL.sln`
 - Run the agent: `dotnet run --project src/PokemonRedRL.Agent`
 - There is currently no CI workflow in `.github/` — builds/tests are run locally.

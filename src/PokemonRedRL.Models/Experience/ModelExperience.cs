@@ -1,5 +1,4 @@
-﻿using Parquet.Serialization.Attributes;
-using static TorchSharp.torch;
+﻿using static TorchSharp.torch;
 using PokemonRedRL.Utils.Helpers;
 using PokemonRedRL.Utils.Enums;
 using MessagePack;
@@ -41,7 +40,6 @@ public class ModelExperience
         Id = Guid.NewGuid(); // Гарантированная инициализация
     }
 
-    [ParquetIgnore]
     [System.Text.Json.Serialization.JsonIgnore]
     [IgnoreMember]  // <-- Tells MessagePack to skip this property
     public Tensor State
@@ -50,7 +48,6 @@ public class ModelExperience
         set => StateBytes = TensorExtensions.SaveTensorToBytes(value);
     }
 
-    [ParquetIgnore]
     [System.Text.Json.Serialization.JsonIgnore]
     [IgnoreMember]  // <-- Tells MessagePack to skip this property
     public Tensor NextState
