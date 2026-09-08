@@ -19,6 +19,12 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
+        // Single-agent mode: used by PokemonRedRL.ControlPanel, one process per emulator slot.
+        // --port <n> binds directly to a known mGBA bridge port (skips NetworkConfigFactory scanning).
+        // --agent-index <n> is only used for console/telemetry tagging.
+        var explicitPort = ParseIntArg(args, "--port");
+        var agentIndex = ParseIntArg(args, "--agent-index") ?? 0;
+
         // Настройка хоста с DI
         var host = Host.CreateDefaultBuilder(args)
             .ConfigureServices(services =>
@@ -47,9 +53,22 @@ internal class Program
 
                 services.AddHostedService<RedisMaintenanceService>();
 
-                services.AddScoped<NetworkConfig>(provider =>
-                    provider.GetRequiredService<NetworkConfigFactory>().Create()
-                );
+                if (explicitPort.HasValue)
+                {
+                    services.AddScoped<NetworkConfig>(_ => new NetworkConfig
+                    {
+                        Host = "127.0.0.1",
+                        Port = explicitPort.Value,
+                        TimeoutMs = 5000,
+                        MaxRetries = 5
+                    });
+                }
+                else
+                {
+                    services.AddScoped<NetworkConfig>(provider =>
+                        provider.GetRequiredService<NetworkConfigFactory>().Create()
+                    );
+                }
                 services.AddScoped<ConnectionManager>();
                 services.AddScoped<SocketProtocol>();
                 services.AddScoped<GameStateSerializer>();
@@ -65,7 +84,64 @@ internal class Program
         var lrScheduler = scope.ServiceProvider.GetRequiredService<AdaptiveLRScheduler>();
         await lrScheduler.LoadStateAsync(); // Вызов после регистрации
 
+        if (explicitPort.HasValue)
+        {
+            await RunSingleAgentAsync(host, agentIndex, explicitPort.Value);
+            return;
+        }
+
+        await RunLegacyMultiAgentAsync(host);
+    }
+
+    private static int? ParseIntArg(string[] args, string name)
+    {
+        for (var i = 0; i < args.Length - 1; i++)
+        {
+            if (string.Equals(args[i], name, StringComparison.OrdinalIgnoreCase)
+                && int.TryParse(args[i + 1], out var value))
+            {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    // Single-process, single-agent mode (control panel: one process per emulator slot).
+    private static async Task RunSingleAgentAsync(IHost host, int agentIndex, int port)
+    {
+        using var cts = new CancellationTokenSource();
+        Console.CancelKeyPress += (_, e) => { e.Cancel = true; cts.Cancel(); };
+
+        using var agentScope = host.Services.CreateScope();
+        var agent = agentScope.ServiceProvider.GetRequiredService<ExplorationAgent>();
+
+        Console.WriteLine($"Agent {agentIndex} initialized on port {port} (single-agent mode)");
+
+        try
+        {
+            while (!cts.Token.IsCancellationRequested)
+            {
+                Console.WriteLine($"Agent {agentIndex} starting new episode");
+                await agent.RunEpisodeAsync(cts);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            Console.WriteLine($"Agent {agentIndex} stopped gracefully");
+        }
+        finally
+        {
+            if (agent is IDisposable disposable)
+                disposable.Dispose();
+        }
+    }
+
+    // Legacy behavior: one process internally running NUMBER_OF_AGENTS agents, ports discovered
+    // via NetworkConfigFactory scanning. Kept for manual/dev use outside the control panel.
+    private static async Task RunLegacyMultiAgentAsync(IHost host)
+    {
         const int NUMBER_OF_AGENTS = 10;
+
 
         // Оптимальное количество потоков (можно настроить под вашу систему)
         var maxDegreeOfParallelism = Environment.ProcessorCount * 2;

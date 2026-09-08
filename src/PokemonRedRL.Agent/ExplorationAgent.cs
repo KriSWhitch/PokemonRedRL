@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using PokemonRedRL.Core.Helpers;
 using PokemonRedRL.Core.Interfaces;
 using PokemonRedRL.DAL.Models;
@@ -175,6 +176,14 @@ public class ExplorationAgent
     {
         Console.WriteLine($"Map: {_currentState.MapId} | Pos: ({_currentState.X},{_currentState.Y}) | " +
             $"Action: {ActionExecutor.GetActionName(action)} | Reward: {reward:F2} | Total: {totalReward:F2} | ε: {epsilon:F2}");
+
+        // Machine-parseable line for PokemonRedRL.ControlPanel telemetry (Services/AgentTelemetryParser.cs).
+        // Kept separate from the human-readable line above so neither format has to compromise for the other.
+        // Always formatted with InvariantCulture so the decimal separator is stable regardless of OS locale.
+        var ic = CultureInfo.InvariantCulture;
+        Console.WriteLine($"STATUS map={_currentState.MapId} x={_currentState.X} y={_currentState.Y} " +
+            $"action={ActionExecutor.GetActionName(action)} reward={reward.ToString("F4", ic)} " +
+            $"total={totalReward.ToString("F4", ic)} epsilon={epsilon.ToString("F4", ic)}");
     }
 
     private void UpdateState()

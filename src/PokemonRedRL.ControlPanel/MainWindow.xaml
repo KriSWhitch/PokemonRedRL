@@ -1,0 +1,104 @@
+﻿<Window x:Class="PokemonRedRL.ControlPanel.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PokemonRedRL.ControlPanel"
+        mc:Ignorable="d"
+        Title="PokemonRedRL Control Panel" Height="800" Width="1200">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="140"/>
+        </Grid.RowDefinitions>
+
+        <!-- Session settings -->
+        <GroupBox Grid.Row="0" Header="Session settings" Margin="0,0,0,8">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="ROM path:" VerticalAlignment="Center" Margin="4"/>
+                <TextBox Text="{Binding RomPath}" Width="260" VerticalAlignment="Center" Margin="4"/>
+
+                <TextBlock Text="Agents:" VerticalAlignment="Center" Margin="4"/>
+                <TextBox Text="{Binding AgentCount}" Width="50" VerticalAlignment="Center" Margin="4"/>
+
+                <TextBlock Text="Base port:" VerticalAlignment="Center" Margin="4"/>
+                <TextBox Text="{Binding BasePort}" Width="70" VerticalAlignment="Center" Margin="4"/>
+
+                <TextBlock Text="Run directory:" VerticalAlignment="Center" Margin="4"/>
+                <TextBox Text="{Binding RunRootDirectory}" Width="120" VerticalAlignment="Center" Margin="4"/>
+
+                <TextBlock Text="Speed profile:" VerticalAlignment="Center" Margin="4"/>
+                <ComboBox ItemsSource="{Binding SpeedProfileOptions}"
+                          SelectedItem="{Binding SpeedProfile}"
+                          Width="110" VerticalAlignment="Center" Margin="4"
+                          ToolTip="Informational only — the control panel cannot enforce fast-forward. For 'Accelerated', enable mGBA's in-app Fast Forward (Tab) per attached window yourself (see Step 10 finding)."/>
+
+                <Button Content="Start run" Command="{Binding StartCommand}" Width="90" Margin="12,4,4,4"/>
+                <Button Content="Stop run" Command="{Binding StopCommand}" Width="90" Margin="4"/>
+
+                <TextBlock Text="Launch mode: ManualAttach only (AutomatedLaunch blocked — see Step 3 finding)"
+                           VerticalAlignment="Center" Margin="12,4,4,4" FontStyle="Italic" Foreground="Gray"/>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- Emulator wall -->
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <ListBox Grid.Row="0" ItemsSource="{Binding CurrentPageTiles}"
+                     SelectedItem="{Binding SelectedTile}"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="3" Rows="3"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="Gray" BorderThickness="1" Margin="4" Padding="4">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Grid.Row="0" FontWeight="Bold"
+                                           Text="{Binding Index, StringFormat='Agent #{0}'}"/>
+
+                                <Image Grid.Row="1" Source="{Binding PreviewImage}" Stretch="Uniform" MinHeight="120"/>
+
+                                <StackPanel Grid.Row="2">
+                                    <TextBlock Text="{Binding Port, StringFormat='Port: {0}'}"/>
+                                    <TextBlock Text="{Binding ConnectionState, StringFormat='State: {0}'}"/>
+                                    <TextBlock Text="{Binding MapId, StringFormat='Map: {0}'}"/>
+                                    <TextBlock Text="{Binding LastAction, StringFormat='Action: {0}'}"/>
+                                    <TextBlock Text="{Binding TotalReward, StringFormat='Total reward: {0:F2}'}"/>
+                                    <TextBlock Text="{Binding ErrorMessage}" Foreground="Red"/>
+                                    <Button Content="Attach window..." Click="OnAttachWindowClick" Tag="{Binding}" HorizontalAlignment="Left" Margin="0,4,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                <Button Content="◀ Prev page" Command="{Binding PreviousPageCommand}" Width="100" Margin="4"/>
+                <TextBlock Text="{Binding CurrentPage}" VerticalAlignment="Center" Margin="8,0"/>
+                <TextBlock Text=" / " VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding TotalPages}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <Button Content="Next page ▶" Command="{Binding NextPageCommand}" Width="100" Margin="4"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Selected tile log panel -->
+        <GroupBox Grid.Row="2" Header="Selected agent log">
+            <ListBox ItemsSource="{Binding SelectedTile.LogLines}" FontFamily="Consolas" FontSize="11"/>
+        </GroupBox>
+    </Grid>
+</Window>
