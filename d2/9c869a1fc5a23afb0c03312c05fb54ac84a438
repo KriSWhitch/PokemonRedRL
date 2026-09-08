@@ -1,0 +1,45 @@
+src/PokemonRedRL.ControlPanel/PokemonRedRL.ControlPanel.csproj
+  s_f64b5f38c35d7d::t_56015f57731ad4 14
+src/PokemonRedRL.Models/PokemonRedRL.Models.csproj
+  s_bf18f29b2630cc::t_40d96b1870cd52 4,10-14
+.github/copilot-instructions.md
+  s_f64b5f38c35d7d::t_0cbc2c30a85a5a 62,68,73
+docs/CODEBASE_MAP.md
+  s_f64b5f38c35d7d::t_60fb768cc07f5b 5,14,73
+docs/PROJECT_OVERVIEW.md
+  s_f64b5f38c35d7d::t_87f6037119746d 67
+docs/tasks/net-package-modernization.md
+  s_bf18f29b2630cc::t_f0747702b0d1f7 1-96
+docs/tasks/roadmap-vision-and-rl-overhaul.md
+  s_f64b5f38c35d7d::t_ea3557ea7cdd8b 20
+src/PokemonRedRL.DAL/PokemonRedRL.DAL.csproj
+  s_bf18f29b2630cc::t_e8d521739b3f63 4
+src/PokemonRedRL.Models/Experience/ModelExperience.cs
+  s_bf18f29b2630cc::t_f5481a5c2bdb54 1
+src/PokemonRedRL.Utils/PokemonRedRL.Utils.csproj
+  s_bf18f29b2630cc::t_6fa8f4e3f12b70 4,10-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "d29c869a1fc5a23afb0c03312c05fb54ac84a438",
+  "prompts": {},
+  "sessions": {
+    "s_bf18f29b2630cc": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "e5464b1a-87b5-4ce5-a2b7-2b5914c8c521",
+        "model": "deeps.eek-ai/DeepS.eek-V4-Pro-claude"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    },
+    "s_f64b5f38c35d7d": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "3b50430e-8ac6-478f-942c-22b9c3a90253",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    }
+  }
+}
