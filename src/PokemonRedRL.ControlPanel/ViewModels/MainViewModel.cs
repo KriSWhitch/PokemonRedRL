@@ -117,6 +117,10 @@ public class MainViewModel : ViewModelBase, IDisposable
             AllTiles.Add(new AgentTileViewModel(slot));
         }
         OnPropertyChanged(nameof(TotalPages));
+
+        // Force CurrentPage to something other than 0 first, then back to 0,
+        // so SetField detects a change and calls RefreshCurrentPage.
+        _currentPage = -1;
         CurrentPage = 0;
 
         foreach (var tile in AllTiles)
