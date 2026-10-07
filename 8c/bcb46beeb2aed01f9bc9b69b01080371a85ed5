@@ -1,0 +1,63 @@
+Dockerfile
+  s_bf18f29b2630cc::t_e11914c0c56f20 1-30
+docs/tasks/docker-containerization.md
+  s_bf18f29b2630cc::t_e4b7d34776f8b9 1-187
+.dockerignore
+  s_bf18f29b2630cc::t_778d28db9c2172 1-25
+.github/copilot-instructions.md
+  s_f64b5f38c35d7d::t_c78d2ad50d4302 73-100,103-104
+docker-compose.yml
+  s_bf18f29b2630cc::t_35316b365acfcd 1-40
+docs/CODEBASE_MAP.md
+  s_f64b5f38c35d7d::t_5eb944f321be58 79-81
+docs/PROJECT_OVERVIEW.md
+  s_f64b5f38c35d7d::t_e15461183bb8c7 45
+docs/tasks/roadmap-vision-and-rl-overhaul.md
+  s_bf18f29b2630cc::t_9d93b7b1c54e0f 21-25,39
+src/PokemonRedRL.Agent/PokemonRedRL.Agent.csproj
+  s_bf18f29b2630cc::t_b9cfb63d5a7f9e 13
+src/PokemonRedRL.Agent/Program.cs
+  s_f64b5f38c35d7d::t_977beed4be767c 24,27,41,45-46,63,112-123
+src/PokemonRedRL.ControlPanel/Models/AgentSlot.cs
+  s_f64b5f38c35d7d::t_31504dd8a30806 10
+src/PokemonRedRL.ControlPanel/Models/RunManifest.cs
+  s_f64b5f38c35d7d::t_d0e113de409357 16
+src/PokemonRedRL.ControlPanel/Services/AgentProcessManager.cs
+  s_f64b5f38c35d7d::t_2a8471c3cf238c 59
+src/PokemonRedRL.ControlPanel/Services/RunManifestService.cs
+  s_f64b5f38c35d7d::t_0a029788e09021 11,27,40-41,53
+src/PokemonRedRL.ControlPanel/ViewModels/MainViewModel.cs
+  s_f64b5f38c35d7d::t_972e7c8201174e 49-51,112
+src/PokemonRedRL.Core/PokemonRedRL.Core.csproj
+  s_bf18f29b2630cc::t_ca29bc09119efc 11
+src/PokemonRedRL.Models/Configuration/RedisConfig.cs
+  s_bf18f29b2630cc::t_edd1c2bddb89ff 5-6
+src/PokemonRedRL.Models/PokemonRedRL.Models.csproj
+  s_bf18f29b2630cc::t_39c53bbe35ccfa 14
+src/PokemonRedRL.Utils/PokemonRedRL.Utils.csproj
+  s_bf18f29b2630cc::t_4bad1a85cd7b4d 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "8cbcb46beeb2aed01f9bc9b69b01080371a85ed5",
+  "prompts": {},
+  "sessions": {
+    "s_bf18f29b2630cc": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "e5464b1a-87b5-4ce5-a2b7-2b5914c8c521",
+        "model": "deeps.eek-ai/DeepS.eek-V4-Pro-claude"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    },
+    "s_f64b5f38c35d7d": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "3b50430e-8ac6-478f-942c-22b9c3a90253",
+        "model": "unknown"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    }
+  }
+}
