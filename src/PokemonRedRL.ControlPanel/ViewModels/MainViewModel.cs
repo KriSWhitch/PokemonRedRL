@@ -46,6 +46,9 @@ public class MainViewModel : ViewModelBase, IDisposable
     private string _runRootDirectory = "runs";
     public string RunRootDirectory { get => _runRootDirectory; set => SetField(ref _runRootDirectory, value); }
 
+    private string _host = "127.0.0.1";
+    public string Host { get => _host; set => SetField(ref _host, value); }
+
     private SpeedProfile _speedProfile = SpeedProfile.Normal;
     public SpeedProfile SpeedProfile { get => _speedProfile; set => SetField(ref _speedProfile, value); }
 
@@ -106,7 +109,7 @@ public class MainViewModel : ViewModelBase, IDisposable
     private void StartRun(object? _)
     {
         var manifest = _manifestService.CreateRun(
-            Path.GetFullPath(RunRootDirectory), RomPath, AgentCount, BasePort, LaunchMode, SpeedProfile);
+            Path.GetFullPath(RunRootDirectory), RomPath, AgentCount, BasePort, LaunchMode, SpeedProfile, Host);
 
         AllTiles.Clear();
         foreach (var slot in manifest.Agents)

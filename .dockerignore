@@ -1,0 +1,25 @@
+# Build outputs (host-native, would conflict with Linux container build)
+**/bin/
+**/obj/
+
+# Large vendored binaries not needed in container
+external/
+programs/
+src/mGBA-0.10.5-win64/
+
+# ROMs and save states (huge, not needed for build)
+src/data/roms/
+*.sav
+*.ss*
+
+# Git
+.git/
+
+# Docs (not needed for build)
+docs/
+*.md
+
+# Solution-level files not needed for build
+.gitignore
+.gitattributes
+README.md

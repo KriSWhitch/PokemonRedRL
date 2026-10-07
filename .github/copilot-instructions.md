@@ -70,9 +70,38 @@ Each non-trivial task gets a committed plan file at `docs/tasks/<slug>.md` (crea
 
 ## Build & run
 
-- Requires: .NET 10 SDK, a running Redis instance on `localhost:6379` (hardcoded in `Program.cs`/`RedisConfig`), mGBA 0.10.5 with `mgba_socket.lua` loaded against a Pokémon Red/FireRed ROM.
+### Quick start (Docker Compose — recommended)
+
+```bash
+# Start Redis + Agent (backend only; mGBA + ControlPanel still run on Windows host)
+docker compose up -d
+
+# Check logs
+docker compose logs -f agent
+
+# Stop (preserves training data)
+docker compose down
+
+# Nuclear option (deletes all training data)
+docker compose down -v
+```
+
+The `docker-compose.yml` defines two services:
+- **`redis`** — `redis/redis-stack-server:latest` with RediSearch, port 6379, persistent named volume
+- **`agent`** — the .NET Agent built from `Dockerfile`, connects to Redis at `redis:6379` and mGBA at `host.docker.internal`
+
+Environment variables for the Agent container:
+- `REDIS_CONNECTION` (default: `redis:6379`) — DI singleton connection
+- `REDIS_HOST` / `REDIS_PORT` (default: `redis` / `6379`) — `RedisExperienceRepository` connection
+- CLI args: `--host host.docker.internal --port 12345 --agent-index 0`
+
+### Manual host-native run (fallback / advanced)
+
+- Requires: .NET 10 SDK, a running Redis instance on `localhost:6379`, mGBA 0.10.5 with `mgba_socket.lua` loaded against a Pokémon Red/FireRed ROM.
 - Build: `dotnet build src/PokemonRedRL.sln`
 - Run the agent: `dotnet run --project src/PokemonRedRL.Agent`
+- Run with custom Redis: `REDIS_CONNECTION=localhost:6379 REDIS_HOST=localhost REDIS_PORT=6379 dotnet run --project src/PokemonRedRL.Agent`
+- Run with custom mGBA host: `dotnet run --project src/PokemonRedRL.Agent -- --host 127.0.0.1 --port 12345`
 - There is currently no CI workflow in `.github/` — builds/tests are run locally.
 
 ## Agentic workflow for this repo

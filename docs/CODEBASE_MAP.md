@@ -76,6 +76,9 @@ Solution file: [src/PokemonRedRL.sln](../src/PokemonRedRL.sln) (6 projects; the 
 PokemonRedRL/
 ├── README.md                     Project overview, demo, tech stack
 ├── .gitignore
+├── docker-compose.yml            Docker Compose: Redis + Agent services (Task 3b)
+├── Dockerfile                    Multi-stage build for containerized Agent (Task 3b)
+├── .dockerignore                 Docker build context exclusions (Task 3b)
 ├── .github/
 │   ├── copilot-instructions.md   AI agent instructions (this repo's conventions/workflow)
 │   └── prompts/                  Custom Copilot Chat prompt skills (see §4)

@@ -8,7 +8,7 @@ public interface IRunManifestService
 {
     /// <summary>Creates a fresh run directory + manifest for the given settings and one slot per agent.</summary>
     RunManifest CreateRun(string rootDirectory, string romPath, int agentCount, int basePort,
-        LaunchMode launchMode, SpeedProfile speedProfile);
+        LaunchMode launchMode, SpeedProfile speedProfile, string host = "127.0.0.1");
 
     void Save(RunManifest manifest);
 
@@ -24,7 +24,7 @@ public class RunManifestService : IRunManifestService
     };
 
     public RunManifest CreateRun(string rootDirectory, string romPath, int agentCount, int basePort,
-        LaunchMode launchMode, SpeedProfile speedProfile)
+        LaunchMode launchMode, SpeedProfile speedProfile, string host = "127.0.0.1")
     {
         var runId = DateTime.Now.ToString("yyyyMMdd-HHmmss");
         var runDirectory = Path.Combine(rootDirectory, runId);
@@ -37,7 +37,8 @@ public class RunManifestService : IRunManifestService
             RomPath = romPath,
             LaunchMode = launchMode,
             SpeedProfile = speedProfile,
-            RunDirectory = runDirectory
+            RunDirectory = runDirectory,
+            Host = host
         };
 
         for (var i = 0; i < agentCount; i++)
@@ -49,6 +50,7 @@ public class RunManifestService : IRunManifestService
             {
                 Index = i,
                 Port = basePort + i,
+                Host = host,
                 RuntimeDirectory = slotDirectory,
                 Status = AgentSlotStatus.Pending
             });

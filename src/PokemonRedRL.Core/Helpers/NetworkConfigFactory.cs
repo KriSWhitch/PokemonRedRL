@@ -8,11 +8,13 @@ public class NetworkConfigFactory
 {
     private readonly int _basePort;
     private readonly int _maxAttempts;
+    private readonly string _host;
     private int _currentPort;
     private readonly object _portLock = new();
 
-    public NetworkConfigFactory(int basePort = 12345, int maxAttempts = 60)
+    public NetworkConfigFactory(string host = "127.0.0.1", int basePort = 12345, int maxAttempts = 60)
     {
+        _host = host;
         _basePort = basePort;
         _maxAttempts = maxAttempts;
         _currentPort = basePort - 1;
@@ -30,7 +32,7 @@ public class NetworkConfigFactory
                 {
                     return new NetworkConfig
                     {
-                        Host = "127.0.0.1",
+                        Host = _host,
                         Port = _currentPort,
                         TimeoutMs = 5000,
                         MaxRetries = 5
@@ -46,7 +48,7 @@ public class NetworkConfigFactory
         try
         {
             using var client = new TcpClient();
-            var result = client.BeginConnect(IPAddress.Loopback, port, null, null);
+            var result = client.BeginConnect(_host, port, null, null);
 
             // Таймаут подключения 500 мс
             bool success = result.AsyncWaitHandle.WaitOne(TimeSpan.FromMilliseconds(500));

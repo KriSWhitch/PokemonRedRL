@@ -13,5 +13,6 @@ public class RunManifest
     public LaunchMode LaunchMode { get; set; } = LaunchMode.ManualAttach;
     public SpeedProfile SpeedProfile { get; set; } = SpeedProfile.Normal;
     public string RunDirectory { get; set; } = string.Empty;
+    public string Host { get; set; } = "127.0.0.1";
     public List<AgentSlot> Agents { get; set; } = new();
 }

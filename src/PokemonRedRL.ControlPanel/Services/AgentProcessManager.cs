@@ -56,7 +56,7 @@ public class AgentProcessManager : IAgentProcessManager, IDisposable
         var startInfo = new ProcessStartInfo
         {
             FileName = "dotnet",
-            Arguments = $"\"{agentDllPath}\" --port {slot.Port} --agent-index {slot.Index}",
+            Arguments = $"\"{agentDllPath}\" --port {slot.Port} --agent-index {slot.Index} --host {slot.Host}",
             WorkingDirectory = slot.RuntimeDirectory,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

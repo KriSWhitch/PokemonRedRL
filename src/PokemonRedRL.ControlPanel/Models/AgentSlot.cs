@@ -7,6 +7,7 @@ public class AgentSlot
 {
     public int Index { get; set; }
     public int Port { get; set; }
+    public string Host { get; set; } = "127.0.0.1";
     public int? EmulatorProcessId { get; set; }
     public int? AgentProcessId { get; set; }
     public long? WindowHandle { get; set; }

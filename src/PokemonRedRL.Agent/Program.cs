@@ -21,8 +21,10 @@ internal class Program
     {
         // Single-agent mode: used by PokemonRedRL.ControlPanel, one process per emulator slot.
         // --port <n> binds directly to a known mGBA bridge port (skips NetworkConfigFactory scanning).
+        // --host <ip> sets the mGBA host address (default 127.0.0.1; use host.docker.internal for containerized Agent).
         // --agent-index <n> is only used for console/telemetry tagging.
         var explicitPort = ParseIntArg(args, "--port");
+        var explicitHost = ParseStringArg(args, "--host") ?? "127.0.0.1";
         var agentIndex = ParseIntArg(args, "--agent-index") ?? 0;
 
         // Настройка хоста с DI
@@ -36,11 +38,12 @@ internal class Program
                     logging.SetMinimumLevel(LogLevel.Debug);
                 });
 
-                services.AddSingleton<NetworkConfigFactory>();
+                services.AddSingleton<NetworkConfigFactory>(_ => new NetworkConfigFactory(host: explicitHost));
                 services.AddSingleton<ParameterServer>();
                 services.AddSingleton<RedisConfig>(new RedisConfig());
                 services.AddSingleton<ConnectionMultiplexer>(provider =>
-                    ConnectionMultiplexer.Connect("localhost:6379"));
+                    ConnectionMultiplexer.Connect(
+                        Environment.GetEnvironmentVariable("REDIS_CONNECTION") ?? "localhost:6379"));
                 services.AddSingleton<AdaptiveLRScheduler>(provider =>
                 {
                     var paramServer = provider.GetRequiredService<ParameterServer>();
@@ -57,7 +60,7 @@ internal class Program
                 {
                     services.AddScoped<NetworkConfig>(_ => new NetworkConfig
                     {
-                        Host = "127.0.0.1",
+                        Host = explicitHost,
                         Port = explicitPort.Value,
                         TimeoutMs = 5000,
                         MaxRetries = 5
@@ -101,6 +104,18 @@ internal class Program
                 && int.TryParse(args[i + 1], out var value))
             {
                 return value;
+            }
+        }
+        return null;
+    }
+
+    private static string? ParseStringArg(string[] args, string name)
+    {
+        for (var i = 0; i < args.Length - 1; i++)
+        {
+            if (string.Equals(args[i], name, StringComparison.OrdinalIgnoreCase))
+            {
+                return args[i + 1];
             }
         }
         return null;

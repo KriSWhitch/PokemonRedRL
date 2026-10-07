@@ -1,0 +1,40 @@
+services:
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: pokemonredrl-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  agent:
+    build: .
+    container_name: pokemonredrl-agent
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_CONNECTION=redis:6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - ./src/data/models:/app/src/data/models
+    command:
+      - --host
+      - host.docker.internal
+      - --port
+      - "12345"
+      - --agent-index
+      - "0"
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+    name: pokemonredrl-redis-data

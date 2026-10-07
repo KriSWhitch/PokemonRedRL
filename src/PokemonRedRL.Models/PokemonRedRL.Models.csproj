@@ -11,7 +11,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.11" />
     <PackageReference Include="StackExchange.Redis" Version="3.1.31" />
     <PackageReference Include="TorchSharp" Version="0.107.0" />
-    <PackageReference Include="TorchSharp-cuda-windows" Version="0.107.0" />
+    <PackageReference Include="TorchSharp-cpu" Version="0.107.0" />
   </ItemGroup>
 
   <ItemGroup>

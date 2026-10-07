@@ -2,8 +2,8 @@
 
 public class RedisConfig
 {
-    public string Host { get; set; } = "localhost";
-    public int Port { get; set; } = 6379;
+    public string Host { get; set; } = Environment.GetEnvironmentVariable("REDIS_HOST") ?? "localhost";
+    public int Port { get; set; } = int.TryParse(Environment.GetEnvironmentVariable("REDIS_PORT"), out var p) ? p : 6379;
     public string BackupDir { get; set; } = "data/redis_backups";
     public string CheckpointsDir { get; set; } = "data/checkpoints";
     public int TimeoutMs { get; set; } = 30_000; // Увеличиваем таймаут
