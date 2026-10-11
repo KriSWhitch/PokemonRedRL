@@ -1,0 +1,21 @@
+docs/PROJECT_SPEC.md
+  s_9553a33d8cab16::t_e26900713baa00 5,67,80-81,105-106,115
+docs/tasks/roadmap-vision-and-rl-overhaul.md
+  s_9553a33d8cab16::t_15171933832508 3,43-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "d84c6c3bf7a332a3d85236f305d14ea23964f4ba",
+  "prompts": {},
+  "sessions": {
+    "s_9553a33d8cab16": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "c9d80a5e-5da7-4e7b-9079-cf7b6380f089",
+        "model": "unknown"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    }
+  }
+}
