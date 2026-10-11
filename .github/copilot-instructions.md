@@ -55,7 +55,11 @@ A full, generated file-by-file map lives in [docs/CODEBASE_MAP.md](../docs/CODEB
 
 A narrative "what/why" companion doc — motivation, RL approach, design tradeoffs, and known gaps/inconsistencies — lives in [docs/PROJECT_OVERVIEW.md](../docs/PROJECT_OVERVIEW.md). Read it before making non-trivial changes; update it if you discover a new design-level inconsistency or resolve a listed one.
 
-Each non-trivial task gets a committed plan file at `docs/tasks/<slug>.md` (created by `/plan-task`, updated through `/review-plan` → `/implement-task` → `/review-changes` → `/commit-changes`, tracking a `Status:` field and a step checklist). These are kept in the repo as a durable record of what was planned and done — do not delete or gitignore `docs/tasks/`.
+The **single source of truth** for project state is [docs/PROJECT_SPEC.md](../docs/PROJECT_SPEC.md). It consolidates all completed tasks, the active epic with subtask status, key decisions, open risks, and artifact links. **Read it first** when starting any task. **Update it** at the checkpoints defined in each BMAD prompt (plan → add task, review → update status, commit → mark done, retro → add lessons). Never hand-edit status fields — let the prompts do it.
+
+Each non-trivial task gets a committed plan file at `docs/tasks/<slug>.md` (created by `/bmad-plan`, updated through `/bmad-review` → `/bmad-build` → `/bmad-commit`, tracking a `Status:` field and a step checklist). These are kept in the repo as a durable record of what was planned and done — do not delete or gitignore `docs/tasks/`.
+
+**Task archiving:** When a task reaches `✅ Done` (via `/bmad-commit`), its file is moved to `docs/tasks/archive/<slug>.md`. Only the active epic roadmap and in-progress/planned tasks stay in `docs/tasks/`. The epic roadmap itself is archived only when the entire epic is `Completed`. This keeps the working directory clean — `docs/tasks/` always contains exactly what's being worked on right now.
 
 ## Conventions actually used in this codebase
 
@@ -64,7 +68,7 @@ Each non-trivial task gets a committed plan file at `docs/tasks/<slug>.md` (crea
 - Interfaces live in an `Interfaces/` folder next to the code they abstract (`IEmulatorClient`, `IRewardCalculatorService`, `IStatePreprocessorService`, `IExperienceRepository`) and are implemented in a sibling `Services/`/`Emulator/` folder.
 - TorchSharp is used directly (`static TorchSharp.torch`, `TorchSharp.Modules`); tensors are created/disposed manually — watch for tensor leaks when editing training code (wrap in `using`/`DisposeScope` where reasonable instead of introducing new leaks).
 - The emulator protocol is a simple newline-terminated text command/response over a raw `TcpClient` (`SocketProtocol.SendCommand`). Any new command must be handled on both the C# side and the Lua side.
-- Existing code comments/log messages are a mix of Russian and English (the author's working language). Match the surrounding file's language when editing an existing block; new files/comments should default to concise English unless the user asks otherwise.
+- Existing code comments/log messages are a mix of Russian and English (the author's working language). Match the surrounding file's language when editing an existing block; new files/comments should default to concise English.
 - No automated test project currently exists in the solution. If you add meaningful logic, prefer adding a test project (`xUnit`, matching `net10.0`) rather than skipping verification.
 - `src/data/roms/` (ROMs, `.sav`/`.ss*` save states) and model backups under `src/data/models/` are **intentionally committed** to this repo as working backups — do not add them to `.gitignore` or untrack them without explicit user confirmation.
 
@@ -104,14 +108,86 @@ Environment variables for the Agent container:
 - Run with custom mGBA host: `dotnet run --project src/PokemonRedRL.Agent -- --host 127.0.0.1 --port 12345`
 - There is currently no CI workflow in `.github/` — builds/tests are run locally.
 
-## Agentic workflow for this repo
+## Agentic workflow for this repo (BMAD-adapted)
 
-For any non-trivial task, follow this pipeline using the prompt skills in [.github/prompts](./prompts):
+This project uses a **BMAD-adapted workflow** (Breakthrough Method for Agile Ai Driven Development). The workflow has four phases:
 
-1. **`/plan-task`** — turn the request into a concrete, ordered implementation plan.
-2. **`/review-plan`** — critically re-review that plan for gaps, missing edge cases, risky/irreversible steps, before writing code.
-3. **`/implement-task`** — execute the reviewed plan step by step, keeping the todo list updated.
-4. **`/review-changes`** — verify the diff: build, check for regressions/leaks/security issues, confirm it matches the plan and update `docs/CODEBASE_MAP.md` if structure changed.
-5. **`/commit-changes`** — only after review passes, stage and commit (push only with explicit user confirmation).
+```mermaid
+flowchart LR
+    C["🎯 Clarify<br/>bmad-brainstorm"] --> P["📋 Plan<br/>bmad-plan"]
+    P --> B["🔨 Build<br/>bmad-build"]
+    B --> R["✅ Review<br/>bmad-review"]
+    R --> M["💾 Commit<br/>bmad-commit"]
+    M --> L["🔄 Learn<br/>bmad-retrospective"]
+    L --> P
+```
 
-Do not skip straight to implementation for multi-step or architecturally-risky changes — run the plan/review steps first.
+### Quick Reference
+
+| Phase | Prompt | Agent Persona | Output |
+|---|---|---|---|
+| Brainstorm | `/bmad-brainstorm` | Mary (Analyst) | `_bmad-output/brainstorm-<topic>.md` |
+| Plan | `/bmad-plan` | John (PM) / Winston (Architect) | `docs/tasks/<slug>.md` or `_bmad-output/spec-<slug>/` |
+| Build | `/bmad-build` | Amelia (Developer) | Code changes |
+| Review | `/bmad-review` | — | Review report |
+| Commit | `/bmad-commit` | — | Git commit |
+| Code Review | `/bmad-code-review` | — | Code review report |
+| Architecture | `/bmad-architecture` | Winston (Architect) | `docs/adr/<date>-<slug>.md` |
+| Retrospective | `/bmad-retrospective` | — | `_bmad-output/retro-<slug>.md` |
+
+### Planning Depths
+
+| Depth | When | Prompts |
+|---|---|---|
+| **Light** | Bug fix, config change | `/bmad-plan` → `/bmad-build` → `/bmad-review` → `/bmad-commit` |
+| **Standard** | Feature, refactor | `/bmad-plan` → `/bmad-architecture` (optional) → `/bmad-build` → `/bmad-review` → `/bmad-commit` |
+| **Full** | Major feature, architecture change | `/bmad-brainstorm` → `/bmad-plan` → `/bmad-architecture` → `/bmad-build` → `/bmad-review` → `/bmad-commit` → `/bmad-retrospective` |
+
+### Agent Personas
+
+Load a persona by reading its file from `.github/agents/`:
+
+| Agent | File | Icon | Role |
+|---|---|---|---|
+| Amelia (Developer) | `.github/agents/amelia-dev.md` | 💻 | Implements code strictly to spec, test-first discipline |
+| John (PM) | `.github/agents/john-pm.md` | 📋 | Creates plans, specs, user stories; outcome-driven |
+| Winston (Architect) | `.github/agents/winston-architect.md` | 🏗️ | Designs components, data flow, ADRs; trade-offs over verdicts |
+| Mary (Analyst) | `.github/agents/mary-analyst.md` | 📊 | Brainstorms, researches, pre-mortems; evidence-based |
+| Sally (UX Designer) | `.github/agents/sally-ux.md` | 🎨 | Designs researcher-facing UI/UX for ControlPanel; human-centered |
+| Pat (Product Owner) | `.github/agents/pat-po.md` | 📌 | Owns backlog, priorities, scope decisions; value-maximizing |
+| Quinn (QA) | `.github/agents/quinn-qa.md` | 🧪 | Verifies quality, catches regressions, designs test scenarios |
+
+### BMAD Configuration
+
+- `_bmad/config.toml` — project configuration (output folders, active initiative, language)
+- `_bmad/custom/` — team/personal overrides (survives updates)
+- `_bmad-output/` — generated BMAD artifacts (briefs, PRDs, specs, retrospectives, brainstorms)
+
+### Spec Law (applies to all plans)
+
+Every plan (standard/full depth) must satisfy:
+1. Each capability has both `intent` (WHAT) and `success signal` (how to verify)
+2. Intents describe WHAT, not HOW — implementation goes in Steps
+3. Constraints actually bend design decisions — decoration gets removed
+4. Non-goals are explicit — at least one
+5. Success signal is concrete enough to test against
+6. Capability IDs are stable and unique — never reused or renumbered
+7. Every load-bearing claim from the input lands in the plan
+8. Lean prose — every sentence carries load-bearing content
+
+### Memlog (full depth plans)
+
+Full-depth plans (`_bmad-output/spec-<slug>/`) include a `.memlog.md` — an append-only, chronological decision log. Format: `<timestamp> | <type> | <text>`. Types: `decision`, `constraint`, `capability`, `assumption`, `question`, `direction`, `note`, `event`. Never edit or reorder existing entries — only append.
+
+### Key Rules
+
+1. **Never skip planning** for multi-step or architecturally-risky changes
+2. **Build after each step** — `dotnet build src/PokemonRedRL.sln`
+3. **Update `docs/CODEBASE_MAP.md`** when files are added/removed/moved
+4. **Match existing file language** — Russian comments stay Russian; new files default to English. All docs, specs, plans, and configs are in English.
+5. **Tensor safety** — wrap TorchSharp tensors in `using`/`DisposeScope`
+6. **Never push without explicit user confirmation**
+7. **Self-validate plans** against Spec Law before presenting
+8. **Evidence-based retrospectives** — every finding links to a commit, file, or event
+9. **Keep `docs/PROJECT_SPEC.md` in sync** — every BMAD phase updates it at its checkpoint (see each prompt's "Update PROJECT_SPEC.md" step). Task statuses use these exact values: `✅ Done`, `🔄 In Progress`, `🔜 Next`, `⬜ Planned`, `⏸️ Blocked`, `❌ Cancelled`. Never reuse or renumber task IDs.
+10. **Read `docs/PROJECT_SPEC.md` first** — before any task, check the active epic, completed tasks, and open risks to avoid duplicating work or repeating known mistakes.

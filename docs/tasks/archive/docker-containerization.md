@@ -130,7 +130,7 @@ Make the backend (Redis + Agent) runnable with a single `docker compose up` comm
 
 ## Verification plan
 
-- **Build:** `dotnet build src/PokemonRedRL.sln` after every code change — 0 errors (`Ошибок: 0`).
+- **Build:** `dotnet build src/PokemonRedRL.sln` after every code change — 0 errors.
 - **Docker build:** `docker build -t pokemonredrl-agent .` succeeds (Step 4).
 - **Redis smoke:** `redis-cli ping` and `redis-cli FT._LIST` against the container (Step 2).
 - **Agent smoke:** Agent starts in container, connects to Redis, logs startup message (Step 5).

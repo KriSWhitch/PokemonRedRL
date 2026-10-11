@@ -46,7 +46,7 @@ Codebase API-surface check (low upgrade risk): TorchSharp usage is all stable AP
 
 ## Steps
 
-Each step ends with the checkpoint: `dotnet build src/PokemonRedRL.sln` → **0 errors** (build output is Russian: grep `Ошибок: 0`), plus the step-specific smoke noted. Commit per step (or per small group) to keep the diff bisectable.
+Each step ends with the checkpoint: `dotnet build src/PokemonRedRL.sln` → **0 errors**, plus the step-specific smoke noted. Commit per step (or per small group) to keep the diff bisectable.
 
 - [x] **Step 0 — Baseline.** Build the current solution on `net8.0`; record error/warning counts, including the existing `NU1902`/`NU1903` MessagePack advisories, so later steps can show them resolved. Confirm `.NET 10` is still the current LTS and SDK 10.0.400 is installed (`dotnet --list-sdks`).
 - [x] **Step 1 — TFM bump.** Change `net8.0` → `net10.0` in Agent/Core/DAL/Models/Utils and `net8.0-windows` → `net10.0-windows` in ControlPanel. Build. **Then delete the stale `bin/`+`obj/` `net8.0` output dirs** (or run `dotnet clean` per project) — `AgentProcessManager.LocateAgentDll` picks the `PokemonRedRL.Agent.dll` with the newest write time across *all* TFM folders, and leftover `net8.0` outputs could shadow or confuse the new build. Smoke: run the Agent briefly against a manually started mGBA (existing flow) to confirm the host starts; launch ControlPanel and confirm it still locates `PokemonRedRL.Agent.dll` (searches by filename, TFM-agnostic — verify it resolves the `net10.0` copy).
@@ -73,7 +73,7 @@ Each step ends with the checkpoint: `dotnet build src/PokemonRedRL.sln` → **0 
 ## Verification plan
 
 - No automated test project exists yet (xUnit arrives in roadmap Task 11), so verification is build + manual smoke:
-  - `dotnet build src/PokemonRedRL.sln` after every step — 0 errors (`Ошибок: 0`), and after Step 3, 0 vulnerability advisories.
+  - `dotnet build src/PokemonRedRL.sln` after every step — 0 errors, and after Step 3, 0 vulnerability advisories.
   - CUDA: `torch.cuda.is_available() == true` and a real training step produces finite loss.
   - Redis: experience round-trip (serialize → stream → deserialize) and `ParameterServer` get/set against the running dev instance.
   - Emulator loop: Agent connects to a manually started mGBA with the bridge script, takes steps, and logs state/rewards as before.

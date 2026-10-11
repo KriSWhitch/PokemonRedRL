@@ -1,0 +1,27 @@
+# BMAD Configuration — PokemonRedRL
+# Adapted for GitHub Copilot (VS Code)
+# Based on BMAD Method v6.x conventions
+
+[core]
+project_name = "PokemonRedRL"
+output_folder = "_bmad-output"
+active_initiative = "roadmap-vision-and-rl-overhaul"
+communication_language = "en"
+
+[workflow]
+# Planning depth: "light" (direct to build), "standard" (spec→tickets→build), "full" (brief→prd→spec→tickets→build)
+default_depth = "standard"
+skills_folder = ".github/prompts"
+
+[agents]
+# Agent personas available via .github/agents/*.md
+dev = "amelia"
+pm = "john"
+architect = "winston"
+analyst = "mary"
+
+[paths]
+project_root = "."
+solution_file = "src/PokemonRedRL.sln"
+tasks_dir = "docs/tasks"
+output_dir = "_bmad-output"
