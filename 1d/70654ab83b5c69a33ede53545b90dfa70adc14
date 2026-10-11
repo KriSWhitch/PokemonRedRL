@@ -1,0 +1,41 @@
+docs/PROJECT_SPEC.md
+  s_bf18f29b2630cc::t_fccbb2cb5e5ba8 5,67,80-81,105-106,115
+docs/tasks/design-vision-representation.md
+  s_9553a33d8cab16::t_26be701c80ab5e 1-141
+docs/tasks/rl-algorithm-review.md
+  s_9553a33d8cab16::t_48eb6b64b61d91 1-143
+docs/tasks/roadmap-vision-and-rl-overhaul.md
+  s_f64b5f38c35d7d::t_19bda30621cede 3,43-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "1d70654ab83b5c69a33ede53545b90dfa70adc14",
+  "prompts": {},
+  "sessions": {
+    "s_9553a33d8cab16": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "c9d80a5e-5da7-4e7b-9079-cf7b6380f089",
+        "model": "unknown"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    },
+    "s_bf18f29b2630cc": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "e5464b1a-87b5-4ce5-a2b7-2b5914c8c521",
+        "model": "unknown"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    },
+    "s_f64b5f38c35d7d": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "3b50430e-8ac6-478f-942c-22b9c3a90253",
+        "model": "unknown"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    }
+  }
+}
