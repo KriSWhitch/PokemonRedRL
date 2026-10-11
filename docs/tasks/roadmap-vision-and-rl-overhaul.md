@@ -1,6 +1,6 @@
 # Roadmap: computer-vision + RL overhaul of PokemonRedRL
 
-Status: In Progress (5/14 tasks done — Tasks 1, 2, 2b, 3, 3b complete; Task 4 is next)
+Status: In Progress (8/14 tasks done — Tasks 1, 2, 2b, 3, 3b, 4a, 4, 5 complete; Task 6 is next)
 
 > **How to read this plan.** This is an *epic-level* roadmap, not a single implementation task. Its "Steps" are an ordered list of **separate future tasks**, each of which will get its own `docs/tasks/<slug>.md` (via `/bmad-plan`) and its own BMAD cycle when it's picked up. This file's job is to sequence them correctly, record the cross-cutting decisions and risks that span multiple tasks, and give the user one place to see the whole arc. Treat each `- [ ]` below as "spin up its own plan when we get here", not as a literal file edit.
 >
@@ -40,14 +40,11 @@ Ultimately: all 5 C# projects, `mgba_socket.lua`, `Program.cs` DI wiring, `Docke
 - [x] **Task 2b — Desktop control panel (WPF). RESOLVED (MVP).** ([docs/tasks/archive/automated-mgba-launch-and-fast-forward.md](archive/automated-mgba-launch-and-fast-forward.md)): Manual attach mode shipped. Auto-launch blocked by mGBA 0.10.5 limitation.
 - [x] **Task 3 — .NET & package modernization. RESOLVED.** ([docs/tasks/archive/net-package-modernization.md](archive/net-package-modernization.md)): net8.0→net10.0, TorchSharp 0.107, CUDA verified. OpenCvSharp4 added as placeholder (to be removed in Task 4a).
 - [x] **Task 3b — Docker containerization. RESOLVED.** ([docs/tasks/archive/docker-containerization.md](archive/docker-containerization.md)): `docker compose up` for Redis + Agent. HARD GATE cleared.
+- [x] **Task 4a — Remove OpenCV, adopt torchvision.transforms. RESOLVED.** ([docs/tasks/archive/remove-opencv-adopt-torchvision.md](archive/remove-opencv-adopt-torchvision.md)): OpenCvSharp4 removed. torchvision.transforms pipeline documented. `dotnet build` passes.
+- [x] **Task 4 — Design the combined (vision + memory-state) representation. RESOLVED.** ([docs/tasks/archive/design-vision-representation.md](archive/design-vision-representation.md)): ADR written at [`docs/adr/2026-10-11-vision-representation.md`](../adr/2026-10-11-vision-representation.md). Decisions: F=2 frame-stack, M=14 memory (all kept), [-1,1] normalization, 512+64→576→256→6 fusion, `Vision.Enabled` feature flag, A/B protocol (50 episodes, Route 3, Welch's t-test). No code changes — pure design.
+- [x] **Task 5 — RL algorithm review. RESOLVED.** ([docs/tasks/archive/rl-algorithm-review.md](archive/rl-algorithm-review.md)): ADR written at [`docs/adr/2026-10-11-rl-algorithm-review.md`](../adr/2026-10-11-rl-algorithm-review.md). Decision: Double DQN + Dueling Heads + Noisy Nets. PPO rejected (on-policy conflicts with Redis). N-step deferred. Distributional rejected. VRAM: 10 agents ~261 MB — fits easily on RTX 4070 SUPER.
 
 ### 🔜 Next Up
-
-- [ ] **Task 4a — Remove OpenCV, adopt torchvision.transforms.** P0 cleanup before design work. Remove `OpenCvSharp4` + `OpenCvSharp4.runtime.win` from `PokemonRedRL.Utils.csproj`. Document the torchvision.transforms pipeline (Resize→Grayscale→Normalize) that replaces it. Verify `dotnet build` passes. **Effort: 1 hour. Blocks: nothing.**
-- [ ] **Task 4 — Design the combined (vision + memory-state) representation.** Write a design doc/ADR settling: hybrid CNN+MLP architecture (confirmed by brainstorm — this task formalizes, doesn't re-litigate), 84×84 grayscale frames, frame-stack depth for motion (2-4 frames), normalization scheme, feature flag `VisionEnabled`, **A/B test protocol** (N episodes with/without vision, same seed, specific milestone, success threshold — e.g. "vision agent reaches Route 3 in ≤80% of episodes of no-vision agent"), and decision on whether positional features (X, Y, MapID) stay in the memory vector or are dropped if vision covers them. **Depends on: T1, T3b. Blocks: T6, T8.**
-- [ ] **Task 5 — RL algorithm review.** Research/decision task: stay with Double-DQN + prioritized replay vs. Rainbow improvements (dueling heads, n-step, noisy nets) vs. PPO. Document tradeoffs given real-time emulator rollouts, multi-agent Redis-shared learning, GPU/VRAM budget. Produce recommendation. **This must land before T8.** Also measure per-agent GPU memory with current MLP-only network as baseline for VRAM budgeting. **Depends on: —. Blocks: T8.**
-
-### ⬜ Planned
 
 - [ ] **Task 6 — Vision project + frame pipeline.** New `PokemonRedRL.Vision` project (`IFrameProvider`/`IVisionPreprocessorService`), OS-level `PrintWindow` capture per Task 1 decision, consume ControlPanel run manifest for window↔agent correlation, produce `Tensor` per frame, performance instrumentation (capture latency, dropped-frame rate). DI registrations in `Program.cs` (Scoped). Tensor disposal as first-class concern with soak-test. **Depends on: T1, T2b, T4. Blocks: T9.**
 - [ ] **Task 7 — Protocol verification + contract test.** Verify no protocol changes needed for vision (OS-level capture is independent of TCP bridge). Land contract test: serialize/deserialize `GameStateResponse` against `GameStateSerializer`. **Depends on: T1. Blocks: —.**

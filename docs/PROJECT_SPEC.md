@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-11
 **Active epic:** [roadmap-vision-and-rl-overhaul](docs/tasks/roadmap-vision-and-rl-overhaul.md)
-**Next task:** Task 4 — Design combined (vision + memory-state) representation
+**Next task:** Task 6 — Vision project + frame pipeline
 
 > **What this file is.** The single source of truth for project state. Every BMAD phase updates it. Humans read it for context; machines read it for state. Never hand-edit the status fields — let the prompts do it.
 
@@ -64,7 +64,7 @@ mGBA (Lua bridge) ←→ .NET Agent (TCP) ←→ Redis Stack
 ## Active Epic: Computer-Vision + RL Overhaul
 
 **Epic file:** [`docs/tasks/roadmap-vision-and-rl-overhaul.md`](docs/tasks/roadmap-vision-and-rl-overhaul.md)
-**Status:** In Progress (6/14 tasks done)
+**Status:** In Progress (8/14 tasks done)
 **Hard gate:** Task 3b ✅ (Docker Compose working — gate cleared)
 
 ### Task Status
@@ -77,8 +77,8 @@ mGBA (Lua bridge) ←→ .NET Agent (TCP) ←→ Redis Stack
 | T3 | .NET modernization | ✅ Done | — | All |
 | T3b | Docker containerization | ✅ Done | — | T4 (HARD GATE) |
 | **T4a** | **Remove OpenCV, adopt torchvision** | ✅ Done | — | T4 |
-| T4 | Design vision+memory representation | ⬜ Planned | T1, T3b, T4a | T6, T8 |
-| T5 | RL algorithm review | ⬜ Planned | — | T8 |
+| T4 | Design vision+memory representation | ✅ Done | T1, T3b, T4a | T6, T8 |
+| T5 | RL algorithm review | ✅ Done | — | T8 |
 | T6 | Vision project + frame pipeline | ⬜ Planned | T1, T2b, T4 | T9 |
 | T7 | Protocol verification + contract test | ⬜ Planned | T1 | — |
 | T8 | Dual-modality network + trainer | ⬜ Planned | T4, T5 | — |
@@ -102,6 +102,8 @@ mGBA (Lua bridge) ←→ .NET Agent (TCP) ←→ Redis Stack
 | Feature flag `VisionEnabled` for baseline comparison | T4 | Without it, can't tell if vision helps |
 | TorchSharp-only preprocessing (no OpenCV) | Brainstorm | `torchvision.transforms` covers Resize→Grayscale→Normalize |
 | 84×84 grayscale frames | Brainstorm | Atari DQN standard, saves VRAM |
+| Vision representation design (ADR) | [ADR 2026-10-11](docs/adr/2026-10-11-vision-representation.md) | F=2 frame-stack, M=14 memory, 512+64→576→256→6 fusion, [-1,1] normalization, A/B protocol |
+| RL algorithm: Double DQN + Dueling + Noisy Nets (ADR) | [ADR 2026-10-11](docs/adr/2026-10-11-rl-algorithm-review.md) | PPO rejected (on-policy conflicts with Redis), N-step deferred, Distributional rejected. VRAM: 10 agents ~261 MB — fits easily. |
 | Redis stays (Kafka rejected) | Brainstorm | Redis covers 5/5 use cases; Kafka covers 1/5 |
 | mGBA stays (no emulator switch) | Brainstorm | Best Game Boy emulator with scripting API |
 | Docker-first: `docker compose up` = everything | Brainstorm | Headless mGBA in Docker (T13), then P/Invoke (T14) |
@@ -110,7 +112,7 @@ mGBA (Lua bridge) ←→ .NET Agent (TCP) ←→ Redis Stack
 
 | Risk | Severity | Mitigation |
 |---|---|---|
-| GPU/VRAM budget for CNN across 10 agents | HIGH | Measure baseline in T5; budget in T8; fallback: shared CNN or fewer agents |
+| GPU/VRAM budget for CNN across 10 agents | LOW | T5 analysis: ~261 MB for 10 agents, >10 GB headroom on RTX 4070 SUPER |
 | Tensor leaks with frame tensors | HIGH | Soak-test in T6/T8; explicit disposal review |
 | Redis payload size with frames | HIGH | Mandatory measurement in T8 before committing storage strategy |
 | No CI/test infrastructure | MEDIUM | T11 adds xUnit; contract test in T7; skeleton created early |
