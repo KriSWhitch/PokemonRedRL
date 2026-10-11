@@ -1,0 +1,81 @@
+_bmad/config.toml
+  s_bf18f29b2630cc::t_bc32a8196e57a0 1-27
+docs/BMAD-MIGRATION.md
+  s_bf18f29b2630cc::t_50baad3fd05f8e 1-116
+.github/copilot-instructions.md
+  s_f64b5f38c35d7d::t_0299e36787f65b 58-62,71,111,113,115-123,125-193
+docs/tasks/archive/net-package-modernization.md
+  s_bf18f29b2630cc::t_38d78fdaf3f6f8 49,76
+.github/agents/john-pm.md
+  s_bf18f29b2630cc::t_4168e09f3d4f91 1-56
+.github/agents/amelia-dev.md
+  s_bf18f29b2630cc::t_3f44b2e36d600c 1-59
+.github/prompts/bmad-review.prompt.md
+  s_bf18f29b2630cc::t_41da53953ae1fa 1-173
+docs/tasks/archive/repo-refactor-and-project-overview-doc.md
+  s_f64b5f38c35d7d::t_e505f5c60ee47e 23
+.github/prompts/bmad-brainstorm.prompt.md
+  s_bf18f29b2630cc::t_256f8832878ca9 1-154
+.github/prompts/bmad-architecture.prompt.md
+  s_bf18f29b2630cc::t_ddc308e3c3aa44 1-224
+.github/prompts/bmad-code-review.prompt.md
+  s_bf18f29b2630cc::t_45268db596d475 1-166
+docs/tasks/roadmap-vision-and-rl-overhaul.md
+  s_f64b5f38c35d7d::t_c4454e47974c8a 3,5-9,13-28,32,36,38-42,44,46-48,50,52-58,60,62-65,67-76,78,80-83,85-113
+docs/CODEBASE_MAP.md
+  s_f64b5f38c35d7d::t_31bbc3e2bf8588 5
+.github/agents/pat-po.md
+  s_bf18f29b2630cc::t_21eeecd779713e 1-57
+.github/agents/winston-architect.md
+  s_bf18f29b2630cc::t_5a1f4c6cb75b8a 1-60
+.github/prompts/bmad-commit.prompt.md
+  s_bf18f29b2630cc::t_6d143256230032 1-161
+.github/prompts/bmad-plan.prompt.md
+  s_bf18f29b2630cc::t_929d1a4f41d9a8 1-292
+.github/agents/quinn-qa.md
+  s_bf18f29b2630cc::t_be19c5fdb84ded 1-90
+docs/tasks/archive/docker-containerization.md
+  s_bf18f29b2630cc::t_af898f64bfe51b 133
+.github/prompts/bmad-retrospective.prompt.md
+  s_bf18f29b2630cc::t_7605f663282267 1-162
+.github/prompts/bmad-build.prompt.md
+  s_bf18f29b2630cc::t_7721cb1ca2e46c 1-110
+_bmad-output/brainstorm-full-architecture-review.md
+  s_bf18f29b2630cc::t_b825ea2e5b530c 1-386
+_bmad-output/brainstorm-epic-roadmap-review.md
+  s_bf18f29b2630cc::t_4ece6206b8f0b9 1-136
+.github/agents/mary-analyst.md
+  s_bf18f29b2630cc::t_545dca7fa7c26a 1-62
+docs/PROJECT_SPEC.md
+  s_bf18f29b2630cc::t_3191c881b3e36f 1-181
+.github/agents/sally-ux.md
+  s_bf18f29b2630cc::t_d5a7ef2f6a1960 1-56
+docs/tasks/archive/remove-opencv-adopt-torchvision.md
+  s_bf18f29b2630cc::t_cdd6cce6f6fec3 1-29
+src/PokemonRedRL.Utils/PokemonRedRL.Utils.csproj
+  s_bf18f29b2630cc::t_8b5d0fcd82ceb3 10-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "f566719fc748186f66f93baefd0386518d0231d1",
+  "prompts": {},
+  "sessions": {
+    "s_bf18f29b2630cc": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "e5464b1a-87b5-4ce5-a2b7-2b5914c8c521",
+        "model": "unknown"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    },
+    "s_f64b5f38c35d7d": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "3b50430e-8ac6-478f-942c-22b9c3a90253",
+        "model": "unknown"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    }
+  }
+}
