@@ -1,38 +1,37 @@
 ---
-description: 'Turn any input — idea, bug report, feature request, brain dump — into a structured implementation plan. Produces docs/tasks/<slug>.md (light/standard) or _bmad-output/spec-<slug>/ (full). Use for any non-trivial task.'
+description: 'Turn an idea, request, or evidence into a structured implementation plan. Resolve plan and spec locations from the repository BMAD configuration. Use for non-trivial work that needs upfront planning.'
 ---
 
 # BMAD Plan — Planning & Specification Phase
 
 ## Overview
 
-You are the planning engine for PokemonRedRL. You take **any input** — a vague idea, a bug report, a feature request, a brain dump, a PRD, meeting notes — and produce a **structured, implementable plan**. This is the single source of truth that every downstream phase (`bmad-build`, `bmad-review`, `bmad-architecture`) consumes.
+You are the planning engine for the current project. You take **any input** — an idea, request, bug report, brief, transcript, or existing artifact — and produce a structured, implementable plan. The approved plan and project context are the contract for downstream phases.
 
-You operate at three depths. Choose based on the input's complexity and risk, not its length. Ask the user if unclear.
+`Light`/`Standard`/`Full` below describe planning-artifact depth only. The delivery route (`Quick Flow` or `Full Flow`) is chosen separately in `/start-flow`.
+
+You operate at three depths. Choose based on the input's complexity and risk, not its length. Read `[workflow].default_depth` from `_bmad/config.toml` as the initial suggestion; override it when the evidence indicates a better fit. Ask the user only when the choice materially changes the planning artifact or approval path.
 
 | Depth | When to use | Output | Example |
 |---|---|---|---|
-| **Light** | Bug fix, config change, typo, small tweak — one file, low risk | `docs/tasks/<slug>.md` with checklist | "Fix IndexOutOfRangeException in UpdatePriorities" |
-| **Standard** | Feature, refactor, new component — multiple files, medium risk | `docs/tasks/<slug>.md` with spec + steps | "Add GPU-accelerated training via CUDA" |
-| **Full** | Major feature, architecture change, cross-cutting concern | `_bmad-output/spec-<slug>/spec-<slug>.md` + companions | "Replace DQN with PPO algorithm" |
+| **Light** | Contained, low-risk change | `[paths.stories_dir]/S<n>-<slug>.md` with checklist | "Correct an off-by-one condition in a parser" |
+| **Standard** | Multi-file feature or refactor | `[paths.stories_dir]/S<n>-<slug>.md` with spec + steps | "Add a configurable export workflow" |
+| **Full** | Cross-cutting work with decisions/artifacts to settle first | `[paths.full_specs_dir]/spec-S<n>-<slug>/` + companions | "Replace a subsystem behind a compatibility boundary" |
 
 ## Conventions
 
 - `{project-root}` = workspace root (contains `_bmad/`)
-- `{output_folder}` = `_bmad-output/` (from `_bmad/config.toml`)
-- `{tasks_dir}` = `docs/tasks/`
+- Resolve `[paths.stories_dir]`, `[paths.output_dir]`, project context sources, and the active delivery route from `_bmad/config.toml` and repository instructions before planning.
+- Do not assume plan, ADR, state, map, or output paths that are not configured or documented.
+- A Story/Bug plan must use the stable `S<n>` ID already allocated in its owning Epic or project-state registry. Do not invent, renumber, or silently change IDs here. Name the plan `<ID>-<slug>.md`; name a Full spec folder `spec-<ID>-<slug>`.
 - Bare paths resolve from `{project-root}`
 - Match existing file language: Russian comments stay Russian; new files default to English
-- Read `.github/copilot-instructions.md` for project conventions before planning
+- Read the instruction file configured by `[paths].instructions_file` for project conventions before planning
 
 ## On Activation
 
 ### Step 1: Load Context
-Read these files for full project understanding:
-1. `.github/copilot-instructions.md` — project conventions, solution layout, build/run
-2. `_bmad/config.toml` — BMAD configuration (output folders, active initiative)
-3. `docs/PROJECT_OVERVIEW.md` — narrative what/why, design tradeoffs, known gaps
-4. `docs/CODEBASE_MAP.md` — file-by-file component map
+Read the repository's root/IDE instructions and `_bmad/config.toml`, then read `[paths].work_items_file` for the active hierarchy, parent, status, and dependencies. Load the relevant Initiative/Epic and plan; use Project Spec and other mapped context sources for technical overview, codebase map, build/test commands, risks, and ADRs.
 
 ### Step 2: Assess the Input
 Classify the input:
@@ -40,11 +39,13 @@ Classify the input:
 - **Mixed** (brain dump, chat transcript, rough notes) → sort and distill yourself
 - **Sparse** (one sentence, vague idea) → elicit more detail before planning; suggest `bmad-brainstorm` if the idea is too raw
 
+Before eliciting, inspect relevant repository and parent-work evidence. Distinguish one cohesive outcome from multiple independently shippable outcomes; multiple files, layers, or verbs do not by themselves mean the work should split. If independent outcomes exist, recommend `/bmad-decompose` or ask the user to select/scope them; never silently drop one. Identify user-visible intent gaps, irreversible actions, and implementation footprint. Resolve gaps from evidence first, then record unresolved material choices as open questions; include irreversible actions and safeguards in risks/steps and identify affected files/contracts in the implementation plan.
+
 ### Step 3: Choose Depth
 Based on complexity and risk, choose light/standard/full. Confirm with user if ambiguous.
 
 ### Step 4: Load Persona (if needed)
-For standard/full depth, adopt the appropriate persona from `.github/agents/`. Choose based on the input type:
+For standard/full depth, adopt the appropriate persona from `[paths].agents_dir`. Choose based on the input type:
 
 | Input type | Persona | File |
 |---|---|---|
@@ -52,7 +53,7 @@ For standard/full depth, adopt the appropriate persona from `.github/agents/`. C
 | Architecture design, component layout, data flow, ADRs | **Winston (Architect)** 🏗️ | `winston-architect.md` |
 | Research-heavy, competitive analysis, pre-mortem, alternatives | **Mary (Analyst)** 📊 | `mary-analyst.md` |
 | Backlog prioritization, scope tradeoffs, acceptance decisions | **Pat (PO)** 📌 | `pat-po.md` |
-| UI/UX for ControlPanel, researcher-facing interfaces | **Sally (UX)** 🎨 | `sally-ux.md` |
+| User-interface or interaction requirements | **Sally (UX)** 🎨 | `sally-ux.md` |
 
 If the input spans multiple domains, load the primary persona and note which other personas should be consulted at review time. Read the persona file and embody it for the planning session.
 
@@ -60,12 +61,20 @@ If the input spans multiple domains, load the primary persona and note which oth
 
 ---
 
+Resolve output paths and project-specific verification requirements from `_bmad/config.toml` and the repository context before using the templates below.
+
 ## Light Depth Plan
 
 ```markdown
 # <Title>
 **Status:** Planned
+**ID:** <S-number>
 **Depth:** Light
+**Flow:** <Quick | Full>
+**Initiative:** <I-number and slug, if applicable>
+**Parent Epic:** <E-number and slug, or "standalone">
+**Parent Branch:** <epic branch or configured base branch>
+**Branch:** `story/s<number>-<slug>` or `bug/s<number>-<slug>`
 **Created:** <date>
 
 ## What
@@ -76,7 +85,7 @@ If the input spans multiple domains, load the primary persona and note which oth
 - [ ] 2. <Concrete action>
 
 ## Verification
-- [ ] `dotnet build src/PokemonRedRL.sln` passes
+- [ ] The project's documented build/check command passes, when applicable
 - [ ] <Any specific test>
 
 ## Risks
@@ -92,7 +101,13 @@ Uses the **five-field kernel** adapted from BMAD Spec Law:
 ```markdown
 # <Title>
 **Status:** Planned
+**ID:** <S-number>
 **Depth:** Standard
+**Flow:** <Quick | Full>
+**Initiative:** <I-number and slug, if applicable>
+**Parent Epic:** <E-number and slug, or "standalone">
+**Parent Branch:** <epic branch or configured base branch>
+**Branch:** `story/s<number>-<slug>` or `bug/s<number>-<slug>`
 **Created:** <date>
 
 ## Why (Motivation)
@@ -128,16 +143,15 @@ Uses the **five-field kernel** adapted from BMAD Spec Law:
 
 ### Steps
 - [ ] 1. <Step title>
-  - **Files:** `<file1.cs>`, `<file2.cs>`
+  - **Files:** `<path1>`, `<path2>`
   - **What:** <Concrete action>
   - **Verify:** <How to check this step is correct>
 - [ ] 2. ...
 
 ### Dependencies
-- New NuGet packages: <list or "none">
-- Redis schema changes: <list or "none">
-- Lua protocol changes: <list or "none">
-- Configuration changes: <list or "none">
+- New packages or external dependencies: <list or "none">
+- Data-store, persistence, or protocol changes: <list or "none">
+- Configuration, deployment, or migration changes: <list or "none">
 
 ## Risks & Edge Cases
 | Risk | Likelihood | Mitigation |
@@ -145,10 +159,9 @@ Uses the **five-field kernel** adapted from BMAD Spec Law:
 | <What could go wrong> | Low/Med/High | <How we handle it> |
 
 ## Verification Checklist
-- [ ] `dotnet build src/PokemonRedRL.sln` passes with no new warnings
-- [ ] `docs/CODEBASE_MAP.md` updated if files added/removed
-- [ ] Tensor allocations wrapped in `using`/`DisposeScope`
-- [ ] DI registrations in `Program.cs` follow existing patterns
+- [ ] The project's documented build and test commands pass
+- [ ] Configured codebase/architecture maps updated if structure changed
+- [ ] Resource ownership, cleanup, and dependency lifetimes follow documented project rules
 - [ ] <Any specific tests or manual checks>
 ```
 
@@ -156,18 +169,18 @@ Uses the **five-field kernel** adapted from BMAD Spec Law:
 
 ## Full Depth Plan
 
-For major features, produce a **spec folder** in `_bmad-output/spec-<slug>/`:
+For major features, produce a **spec folder** under `[paths.full_specs_dir]`, named `spec-S<n>-<slug>/`:
 
 ```
-_bmad-output/spec-<slug>/
-├── spec-<slug>.md           ← The kernel (Why, Capabilities, Constraints, Non-goals, Success)
+<configured-full-specs-dir>/spec-S<n>-<slug>/
+├── spec-S<n>-<slug>.md      ← The kernel (Why, Capabilities, Constraints, Non-goals, Success)
 ├── architecture.md           ← Component design, data flow, ADRs (or adopt from bmad-architecture)
 ├── tickets.toml              ← Break-down into implementable tickets
 ├── .memlog.md                ← Append-only decision log (see Memlog section)
 └── <companion>.md            ← Optional: glossary, brownfield notes, stack decisions
 ```
 
-### Spec Kernel (`spec-<slug>.md`)
+### Spec Kernel (`spec-S<n>-<slug>.md`)
 
 ```markdown
 ---
@@ -219,36 +232,36 @@ Rules:
 - Terminal moments (spec finalized, review passed) are `event` entries
 - The spec file is **re-derived from the memlog** on each update
 
-### Step N: Update PROJECT_SPEC.md
+### Step N: Update project state
 
 After the plan is finalized and saved:
-- Open `docs/PROJECT_SPEC.md`
-- If this is a new task for the active epic: add a row to the **Active Epic → Task Status** table with `⬜ Planned`
-- If this is a standalone task (not part of the active epic): add a row to the **Completed Tasks** table with `🔄 In Progress`
-- Update `**Last updated:**` to today's date
-- If `_bmad/config.toml` → `active_initiative` is empty and this is an epic-level plan: set it to the new slug
+- Resolve `[paths].work_items_file` and record the allocated ID, owner/parent, dependencies, exact branch name, and `Planned` status there. Preserve the branch state already recorded by `/start-flow`; do not reset an active branch to `Not created`. Update the owning Epic's child list in the same approved operation when required by this workflow.
+- For a standalone Story/Bug, add it to the appropriate WORK_ITEMS section as active work, not to completed history.
+- Update `**Updated:**` in WORK_ITEMS and `**Last updated:**` in Project Spec only when their respective content changes.
+- If this plan changes Initiative or Epic scope, use `/bmad-decompose` and update its configured parent record before implementation.
 
 ### Tickets (`tickets.toml`)
 
 Break the spec into independently implementable tickets:
 
 ```toml
+# Ticket IDs here are local to this spec; global work-item IDs remain I/E/S.
 [[tickets]]
-id = "T-1"
+id = "ITEM-1"
 title = "<Short title>"
 capability = "CAP-1"
 description = "<What to implement>"
-files = ["<file1.cs>", "<file2.cs>"]
+files = ["<path1>", "<path2>"]
 depends_on = []
 estimated_hours = 2
 
 [[tickets]]
-id = "T-2"
+id = "ITEM-2"
 title = "<Short title>"
 capability = "CAP-2"
 description = "<What to implement>"
-files = ["<file3.cs>"]
-depends_on = ["T-1"]
+files = ["<path3>"]
+depends_on = ["ITEM-1"]
 estimated_hours = 3
 ```
 
@@ -285,8 +298,9 @@ Present the plan to the user. For light/standard: the plan file content. For ful
 
 ## After Approval
 
-- Set `_bmad/config.toml` → `active_initiative` to the slug if this is the active work
+- Update the plan status to `**Status:** Approved` only after the user explicitly approves the plan.
+- Set `_bmad/config.toml` → `active_initiative` to the full Initiative ID/slug (for example `I1-computer-vision-rl-overhaul`) if this is the active work; do not copy status rows into Project Spec
 - Suggest next step: `/bmad-build` (or `/bmad-architecture` if architecture is non-trivial)
-- `{tasks_dir}` = `docs/tasks/` (from config)
+- `{stories_dir}` = `[paths.stories_dir]` from `_bmad/config.toml`
 - All paths relative to `{project-root}`
 - Use Russian for comments matching existing file language; English for new files

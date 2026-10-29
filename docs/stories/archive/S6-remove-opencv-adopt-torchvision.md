@@ -1,4 +1,5 @@
-# Task 4a — Remove OpenCV, adopt torchvision.transforms
+# S6 — Remove OpenCV, adopt torchvision.transforms
+**ID:** S6 (legacy ID: T4a)
 **Status:** ✅ Done
 **Depth:** Light
 **Created:** 2026-10-11

@@ -1,5 +1,13 @@
 # BMAD Migration Guide — PokemonRedRL
 
+## Current Entry Point
+
+Start or resume project work with GitHub Copilot's `/start-flow` prompt. It checks project state and routes to the existing phase prompts. Russian natural-language requests such as "начни работу" or "запусти BMAD" activate the same entry point; they are not separate slash aliases.
+
+The authoritative process is [BMAD-WORKFLOW.md](BMAD-WORKFLOW.md). This file records the migration from the original custom prompts and is not a second workflow specification.
+
+This is a repository-local GitHub Copilot setup. It does not use AI Forge, `vsdlc`, external BMAD scripts, MCP servers, YouTrack, Figma, or test-management integrations.
+
 ## What Changed
 
 The project workflow has been migrated from custom prompts (`/plan-task`, `/review-plan`, `/implement-task`, `/review-changes`, `/commit-changes`) to a **BMAD-adapted workflow**.
@@ -20,9 +28,9 @@ The project workflow has been migrated from custom prompts (`/plan-task`, `/revi
 
 ## Existing Tasks
 
-Your existing task plans in `docs/tasks/` are **fully compatible**. They already follow a similar format (Status field, step checklist). To migrate an existing task:
+Your existing task plans in `docs/stories/` are **fully compatible**. They already follow a similar format (Status field, step checklist). To migrate an existing task:
 
-1. The task file stays in `docs/tasks/<slug>.md`
+1. The Story plan uses its stable ID in `docs/stories/S<n>-<slug>.md`
 2. Use `/bmad-build` to implement remaining steps
 3. Use `/bmad-review` instead of `/review-changes`
 4. Use `/bmad-commit` instead of `/commit-changes`
@@ -46,6 +54,14 @@ _bmad-output/                ← future BMAD artifacts go here
 │   ├── pat-po.md            ← Product Owner persona (📌) — NEW
 │   └── quinn-qa.md          ← QA persona (🧪) — NEW
 ├── prompts/
+│   ├── start-flow.prompt.md      ← Start/resume router for the BMAD workflow
+│   ├── bmad-help.prompt.md       ← Current-state and next-command guide
+│   ├── bmad-decompose.prompt.md  ← Initiative → Epics / Epic → User Stories
+│   ├── bmad-correct-course.prompt.md ← Approved plan revision after material changes
+│   ├── bmad-test-design.prompt.md ← Optional risk-based verification design
+│   ├── bmad-ux.prompt.md         ← Optional WPF UX contract; no Figma required
+│   ├── bmad-archive.prompt.md    ← Archive a completed work record; no commit/merge
+│   ├── bmad-merge.prompt.md      ← Merge an archived branch into its immediate parent
 │   ├── bmad-plan.prompt.md         ← Planning (3 depths, Spec Law, memlog)
 │   ├── bmad-build.prompt.md        ← Implementation (oneshot/full routes)
 │   ├── bmad-review.prompt.md       ← Multi-lens review (6 lenses)
@@ -74,7 +90,7 @@ All 5 agents have been rewritten with real BMAD agent architecture:
 
 ## Prompt Quality (v2 — BMAD-depth)
 
-All 8 prompts have been rewritten with real BMAD methodology depth (100-300+ lines each):
+The BMAD phase prompts provide the methodology; `start-flow.prompt.md` is the entrypoint, and `bmad-decompose` / `bmad-merge` cover hierarchy and branch closure:
 
 | Feature | v1 (basic) | v2 (BMAD-depth) |
 |---|---|---|
@@ -93,23 +109,25 @@ All 8 prompts have been rewritten with real BMAD methodology depth (100-300+ lin
 
 ## Quick Start
 
+For new work, start with `/start-flow`. The examples below show the phase prompts that the entry point selects; use them directly when resuming a known phase.
+
 1. **Simple bug fix:**
    ```
-   /bmad-plan light "Fix IndexOutOfRangeException in ExplorationAgent.UpdatePriorities"
+   /start-flow Fix IndexOutOfRangeException in ExplorationAgent.UpdatePriorities
    ```
-   Then: `/bmad-build` → `/bmad-review` → `/bmad-commit`
+   Bugs use Quick Flow: `/bmad-build` → `/bmad-review` → `/bmad-archive` → `/bmad-commit` → `/bmad-merge`.
 
 2. **New feature:**
    ```
-   /bmad-plan standard "Add GPU-accelerated training via CUDA"
+   /start-flow Add GPU-accelerated training via CUDA
    ```
-   Then: `/bmad-architecture` (optional) → `/bmad-build` → `/bmad-review` → `/bmad-commit`
+   Choose Quick Flow if behavior is clear, or Full Flow to settle requirements and architecture first; finish with `/bmad-review` → `/bmad-archive` → `/bmad-commit` → `/bmad-merge`.
 
-3. **Brainstorm + full cycle:**
+3. **Create an Initiative and decompose it:**
    ```
-   /bmad-brainstorm "How to improve reward shaping for exploration"
+   /start-flow Create an Initiative for vision-based exploration improvements
    ```
-   Then: `/bmad-plan full` → `/bmad-architecture` → `/bmad-build` → `/bmad-review` → `/bmad-commit` → `/bmad-retrospective`
+   On the Initiative branch, use `/bmad-decompose` to propose Epics. Start each Epic separately, then use `/bmad-decompose` on its branch to create User Stories.
 
 ## No Dependencies
 

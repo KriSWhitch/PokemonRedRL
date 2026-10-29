@@ -1,4 +1,5 @@
-# Task 4 — Design combined (vision + memory-state) representation
+# S7 — Design combined (vision + memory-state) representation
+**ID:** S7 (legacy ID: T4)
 **Status:** ✅ Done
 **Depth:** Standard
 **Created:** 2026-10-11
@@ -47,7 +48,7 @@ A developer can read the ADR and implement `PokeVisionDQN` (T8) and `IVisionPrep
 
 ### Architecture Notes
 
-This task produces a single artifact: an Architecture Decision Record at `docs/adr/2026-10-11-vision-representation.md`.
+This task produces a single artifact: an Architecture Decision Record at `docs/adr/ADR-0001-vision-representation.md`.
 
 The ADR must settle these specific questions:
 
@@ -114,7 +115,7 @@ The CNN architecture above is the **Atari DQN standard** (Mnih et al. 2015), ada
   - **Verify:** ADR includes the protocol. A researcher can execute it without asking "how many episodes?" or "what counts as success?"
 
 - [x] 7. **Write the ADR**
-  - **Files:** Create `docs/adr/2026-10-11-vision-representation.md`
+  - **Files:** Create `docs/adr/ADR-0001-vision-representation.md`
   - **What:** Consolidate all decisions from steps 1–6 into a single Architecture Decision Record following the project's ADR format.
   - **Verify:** ADR is self-contained — a new contributor can read it and understand the vision representation without reading this plan.
 
@@ -134,7 +135,7 @@ The CNN architecture above is the **Atari DQN standard** (Mnih et al. 2015), ada
 | `VisionEnabled` flag creates two code paths that diverge | Medium | Design the flag as a DI-level switch, not if/else scattered through the codebase. No-vision path reuses existing `PokeDQN` directly |
 
 ## Verification Checklist
-- [x] ADR exists at `docs/adr/2026-10-11-vision-representation.md`
+- [x] ADR exists at `docs/adr/ADR-0001-vision-representation.md`
 - [x] ADR answers all 6 capability questions (tensor shapes, memory vector, fusion, feature flag, A/B protocol, positional features)
 - [x] ADR includes a mermaid diagram of the full forward pass with tensor shapes
 - [x] `dotnet build src/PokemonRedRL.sln` passes (no code changes, but verify nothing broke)

@@ -1,4 +1,5 @@
-# Task 5 — RL Algorithm Review
+# S8 — RL Algorithm Review
+**ID:** S8 (legacy ID: T5)
 **Status:** ✅ Done
 **Depth:** Standard
 **Created:** 2026-10-11
@@ -45,7 +46,7 @@ A developer reading the recommendation document can implement the chosen algorit
 
 ### Architecture Notes
 
-This task produces a single artifact: a recommendation document at `docs/adr/2026-10-11-rl-algorithm-review.md` (or a section appended to the existing T4 ADR — decision during build).
+This task produces a single artifact: a recommendation document at `docs/adr/ADR-0002-rl-algorithm-review.md` (or a section appended to the existing T4 ADR — decision during build).
 
 The document must cover these specific questions:
 
@@ -114,7 +115,7 @@ Double DQN          ──→    Rainbow DQN improvements      ──→    Algo
   - **Verify:** Recommendation is actionable — a developer can implement it without further research.
 
 - [x] 7. **Write the recommendation document**
-  - **Files:** Create `docs/adr/2026-10-11-rl-algorithm-review.md`
+  - **Files:** Create `docs/adr/ADR-0002-rl-algorithm-review.md`
   - **What:** Consolidate all findings from steps 1–6 into a single document.
   - **Verify:** Document is self-contained. A new contributor can read it and understand the algorithm choice without reading this plan.
 
@@ -135,7 +136,7 @@ Double DQN          ──→    Rainbow DQN improvements      ──→    Algo
 | Recommendation is "stay with current Double DQN" — feels like no progress | Low | "No change" is a valid and valuable decision. Document why the current setup is already good, and what incremental improvements are worth making. |
 
 ## Verification Checklist
-- [ ] Recommendation document exists at `docs/adr/2026-10-11-rl-algorithm-review.md`
+- [ ] Recommendation document exists at `docs/adr/ADR-0002-rl-algorithm-review.md`
 - [ ] Document covers all 4 capabilities (current state, Rainbow eval, PPO eval, final recommendation)
 - [ ] GPU memory baseline is measured or theoretically calculated
 - [ ] VRAM budget for `PokeVisionDQN` is estimated with yes/no on 10 agents

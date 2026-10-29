@@ -9,7 +9,7 @@ namespace PokemonRedRL.ControlPanel.Services;
 
 /// <summary>
 /// Captures a still frame of an mGBA window using PrintWindow, per the Task 1 frame-capture spike
-/// decision (docs/tasks — PrintWindow chosen over other capture APIs). Used for per-tile previews,
+/// decision ([S1 frame-capture spike](../../../docs/stories/archive/S1-frame-capture-spike.md) — PrintWindow chosen over other capture APIs). Used for per-tile previews,
 /// throttled by the caller (see MainViewModel's preview timer) to the frozen 10 FPS/tile UX contract
 /// — this service itself is stateless and does one capture per call.
 /// </summary>

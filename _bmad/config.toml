@@ -5,16 +5,24 @@
 [core]
 project_name = "PokemonRedRL"
 output_folder = "_bmad-output"
-active_initiative = "roadmap-vision-and-rl-overhaul"
+active_initiative = "I1-computer-vision-rl-overhaul"
 communication_language = "en"
 
 [workflow]
-# Planning depth: "light" (direct to build), "standard" (spec→tickets→build), "full" (brief→prd→spec→tickets→build)
+# Planning artifact depth, distinct from the User Story Quick/Full delivery route.
 default_depth = "standard"
-skills_folder = ".github/prompts"
+
+[ids]
+initiative_prefix = "I"
+epic_prefix = "E"
+story_prefix = "S"
+adr_prefix = "ADR"
+adr_digits = 4
+brainstorm_prefix = "BR"
+brainstorm_digits = 4
+registry_file = "docs/WORK_ITEMS.md"
 
 [agents]
-# Agent personas available via .github/agents/*.md
 dev = "amelia"
 pm = "john"
 architect = "winston"
@@ -22,6 +30,33 @@ analyst = "mary"
 
 [paths]
 project_root = "."
+instructions_file = ".github/copilot-instructions.md"
+agents_dir = ".github/agents"
+prompts_dir = ".github/prompts"
 solution_file = "src/PokemonRedRL.sln"
-tasks_dir = "docs/tasks"
+project_state_file = "docs/PROJECT_SPEC.md"
+work_items_file = "docs/WORK_ITEMS.md"
+project_overview_file = "docs/PROJECT_OVERVIEW.md"
+codebase_map_file = "docs/CODEBASE_MAP.md"
+workflow_guide_file = "docs/BMAD-WORKFLOW.md"
+adr_dir = "docs/adr"
+stories_dir = "docs/stories"
+story_archive_dir = "docs/stories/archive"
 output_dir = "_bmad-output"
+full_specs_dir = "_bmad-output"
+brainstorm_dir = "_bmad-output"
+brainstorm_archive_dir = "_bmad-output/archive/brainstorms"
+retrospective_dir = "_bmad-output"
+ux_artifacts_dir = "_bmad-output"
+initiatives_dir = "docs/initiatives"
+initiative_archive_dir = "docs/initiatives/archive"
+epics_dir = "docs/epics"
+epic_archive_dir = "docs/epics/archive"
+
+[git]
+remote_name = "origin"
+default_base_branch = "development"
+initiative_branch_prefix = "initiative"
+epic_branch_prefix = "epic"
+story_branch_prefix = "story"
+bug_branch_prefix = "bug"

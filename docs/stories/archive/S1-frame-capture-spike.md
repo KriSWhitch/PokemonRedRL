@@ -1,8 +1,9 @@
-# Task 1 — Spike: validate the frame-capture mechanism
+# S1 — Spike: validate the frame-capture mechanism
+**ID:** S1 (legacy ID: T1)
 
 Status: Done
 
-> Sub-task of [docs/tasks/roadmap-vision-and-rl-overhaul.md](roadmap-vision-and-rl-overhaul.md) (Task 1). This is a diagnostic spike: its deliverable is a **decision + evidence**, not production code. No CV architecture work (roadmap Tasks 4+) should start until this is done.
+> Sub-task of [docs/stories/roadmap-vision-and-rl-overhaul.md](../roadmap-vision-and-rl-overhaul.md) (Task 1). This is a diagnostic spike: its deliverable is a **decision + evidence**, not production code. No CV architecture work (roadmap Tasks 4+) should start until this is done.
 
 ## Goal
 
@@ -17,7 +18,7 @@ Determine, with an actual working prototype and measured numbers (not guesses), 
 - **New, throwaway spike code** under `tools/frame-capture-spike/` (a small standalone console project, **not** added to `src/PokemonRedRL.sln`) — kept isolated so it can't accidentally break the production build, and deleted (or explicitly promoted) at the end of this task.
 - A **temporary, clearly-marked test copy** of the frame-capture Lua command added to a scratch copy of `src/mGBA-0.10.5-win64/scripts/mgba_socket.lua` (not the real file) so the authoritative bridge script isn't touched by spike code.
 - `docs/PROJECT_OVERVIEW.md` §7 — replace the "open technical risk" paragraph with the actual decision + numbers once known.
-- `docs/tasks/roadmap-vision-and-rl-overhaul.md` — tick Task 1's checkbox, update its Open Questions/Risks entries that referenced this spike as unresolved.
+- `docs/stories/roadmap-vision-and-rl-overhaul.md` — tick Task 1's checkbox, update its Open Questions/Risks entries that referenced this spike as unresolved.
 
 ## Steps
 
@@ -49,7 +50,7 @@ Determine, with an actual working prototype and measured numbers (not guesses), 
 2. **Scripts must be loaded via the GUI; there is no scripted/headless way to load one in mGBA 0.10.5.** No CLI flag, no config key, no documented autorun mechanism. Confirmed by testing.
 3. **External keyboard-simulation automation of the Tools → Scripting menu was attempted and did not work reliably** — both `keybd_event` and `SendInput` were tried (with explicit Alt-hold sequencing); Qt's menu mnemonics visibly activated (underlines appeared) but the dropdown never actually opened from an external process. This is a known category of Windows issue (synthetic input from a non-foreground-owning process not being treated identically to real hardware input for some UI feedback paths) rather than a simple mistake — solving it reliably would need either `AttachThreadInput`, a full UI Automation (UIA) approach, or driving it through mGBA's GDB/other developer-facing interface if one exists. **This is now a real, separate finding for the roadmap** (see Task 2 update below) independent of vision.
 4. **The correct Lua API for screenshots is `emu:screenshot(path)`, not `core:screenshot(path)`.** The official scripting docs list `screenshot` under the `Core` class, but the actual accessible top-level global is `emu` (a `CoreAdapter` instance that wraps `Core` and exposes the same methods) — there is no global named `core` at all. This was an error in the scratch script, caught and fixed via a `pcall`-wrapped error message rather than silently hanging.
-- [x] **8. Write the decision into `docs/PROJECT_OVERVIEW.md` §7** (replacing the current "open technical risk" paragraph) and update `docs/tasks/roadmap-vision-and-rl-overhaul.md` (tick Task 1, update Task 6/7's descriptions if the chosen mechanism changes what they need to build, update the now-resolved open questions).
+- [x] **8. Write the decision into `docs/PROJECT_OVERVIEW.md` §7** (replacing the current "open technical risk" paragraph) and update `docs/stories/roadmap-vision-and-rl-overhaul.md` (tick Task 1, update Task 6/7's descriptions if the chosen mechanism changes what they need to build, update the now-resolved open questions).
 - [x] **9. Clean up the spike.** Delete `tools/frame-capture-spike/` and the scratch Lua script copy unless the winning approach's prototype code is worth keeping as a literal seed for Task 6 — if kept, say so explicitly in the roadmap so it isn't mistaken for abandoned clutter later, and run `/cartograph` if it's kept (a new tracked project is a structural change). Also delete any leftover screenshot/capture files from the OS temp directory used during benchmarking, and confirm (`Get-Process mgba* `/similar) that no spike-spawned `mGBA.exe` processes are still running.
 
 ## Risks & irreversible actions
@@ -115,9 +116,9 @@ Ready for `/review-changes`.
 
 ## Review notes (from `/review-changes`)
 
-**Diff scope:** `git status`/`git diff --stat` confirms `tools/` is fully gone (not even present as untracked — created and deleted entirely within this session, so it left no git trace at all). New changes from this task: `docs/PROJECT_OVERVIEW.md` and `docs/tasks/roadmap-vision-and-rl-overhaul.md` updates (both untracked, part of the still-uncommitted `docs/` folder), plus incidental binary/config churn from actually running mGBA: `src/mGBA-0.10.5-win64/config.ini` (1 line, `lastDirectory`), `qt.ini` (MRU/recent-scripts list), `nointro.sqlite3` (binary, mGBA's game database), `src/data/roms/pokemon_red.sav` (binary, cartridge save). All other diffed files (`Enums.cs`, `RewardCalculatorService.cs`, etc.) are unrelated leftover uncommitted changes from the earlier repo-refactor task, not from this one — confirmed unchanged by re-reading their diffs, no overlap.
+**Diff scope:** `git status`/`git diff --stat` confirms `tools/` is fully gone (not even present as untracked — created and deleted entirely within this session, so it left no git trace at all). New changes from this task: `docs/PROJECT_OVERVIEW.md` and `docs/stories/roadmap-vision-and-rl-overhaul.md` updates (both untracked, part of the still-uncommitted `docs/` folder), plus incidental binary/config churn from actually running mGBA: `src/mGBA-0.10.5-win64/config.ini` (1 line, `lastDirectory`), `qt.ini` (MRU/recent-scripts list), `nointro.sqlite3` (binary, mGBA's game database), `src/data/roms/pokemon_red.sav` (binary, cartridge save). All other diffed files (`Enums.cs`, `RewardCalculatorService.cs`, etc.) are unrelated leftover uncommitted changes from the earlier repo-refactor task, not from this one — confirmed unchanged by re-reading their diffs, no overlap.
 
-**Plan compliance:** all 9 steps in `docs/tasks/frame-capture-spike.md` are ticked, and the "Affected files/projects" list matches what actually happened — `docs/PROJECT_OVERVIEW.md` §7 was rewritten with the real decision (verified: no more "open technical risk" placeholder text, replaced with the measured comparison table), and the roadmap's Task 1 is marked resolved with Tasks 2/6/7 updated to reflect it (verified by reading the file directly). No scope creep: no source files in the 5 tracked C# projects were touched by this task.
+**Plan compliance:** all 9 steps in `docs/stories/S1-frame-capture-spike.md` are ticked, and the "Affected files/projects" list matches what actually happened — `docs/PROJECT_OVERVIEW.md` §7 was rewritten with the real decision (verified: no more "open technical risk" placeholder text, replaced with the measured comparison table), and the roadmap's Task 1 is marked resolved with Tasks 2/6/7 updated to reflect it (verified by reading the file directly). No scope creep: no source files in the 5 tracked C# projects were touched by this task.
 
 **Build:** `dotnet build src/PokemonRedRL.sln` — 0 `error CS`, 0 new `warning CS` (incremental/up-to-date, consistent with the already-established clean baseline). Solution genuinely untouched by this task.
 

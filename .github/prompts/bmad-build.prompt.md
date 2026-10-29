@@ -1,110 +1,68 @@
 ---
-description: 'Implement an approved plan step-by-step. Works from docs/tasks/<slug>.md or _bmad-output/spec-<slug>/. Strictly follows the spec — no scope creep. Builds after each step.'
+description: 'Implement an approved plan or run a Quick Flow. Creates and gets approval for a concise Quick spec before code; follows repository verification and safety rules.'
 ---
 
-# BMAD Build — Implementation Phase
+# BMAD Build — Implementation
 
-## Overview
+Implement an approved plan in small, verifiable steps. Stay within scope, preserve unrelated work, and use only build/test commands and engineering constraints documented by the active project.
 
-You are the implementation engine for PokemonRedRL. You take an **approved plan** (from `bmad-plan`) and execute it **step by step**, verifying each step before moving to the next. You work strictly to spec — no scope creep, no "while I'm here" improvements, no unplanned refactors.
+## Delivery Route
 
-## Route Selection
+Quick/Full is selected by `/start-flow`; it is separate from execution mode.
 
-On activation, determine which route to take:
+### Quick Flow
 
-| Route | When | Behavior |
+If no approved plan exists:
+
+1. Read the user request, repository instructions, relevant source, and parent work record before asking questions. Size the change by one coherent outcome and implementation session, not by verbs or files; if it contains independent outcomes, stop and route to `/bmad-decompose` or ask the user to select the first outcome.
+2. Resolve the plan directory from `_bmad/config.toml [paths].stories_dir`.
+3. Use the already-reserved `S<n>` Story/Bug ID. Create a concise plan named `<ID>-<slug>.md` with `Status: Planned`, ID, selected flow, parent IDs/branch metadata required by this project, one intent, acceptance signals, constraints, non-goals, implementation steps, and focused verification.
+4. Investigate repository and parent context before asking about gaps. Present unresolved questions with options and consequences; do not approve or implement while a material user-visible gap remains undecided. Show any irreversible action and its safeguard explicitly.
+5. Present the plan and wait for approval. Do not edit product code before approval.
+6. On approval, set `Status: Approved`. If UI behavior is materially unclear, pause and offer `/bmad-ux`. If project context identifies a high-risk boundary, pause and offer `/bmad-test-design`. Resume implementation only after selected design/verification work is approved.
+
+If an approved plan already exists, reuse it; do not create a duplicate.
+
+### Full Flow
+
+Full Flow requires approved upfront requirements/planning and completion of the architecture phase (`/bmad-architecture`, including an explicit no-op if architecture is unchanged). Use approved parent context and any approved UX/test-design artifacts. Do not create a second Quick spec.
+
+## Execution Mode
+
+| Mode | When | Behavior |
 |---|---|---|
-| **Oneshot** | Light plan, single file, low risk | Execute all steps in one pass, build once at end |
-| **Full** | Standard/full plan, multiple files, medium+ risk | Execute step-by-step, build after each step, pause for review at checkpoints |
+| **Single-pass** | Light plan, contained change, low risk | Read all affected files, implement the plan, and run focused verification at the end. |
+| **Step-by-step** | Multi-file or higher-risk work | Follow plan order, verify each meaningful step, and pause at the plan's review checkpoints. |
 
-Default to **Full** unless the plan is explicitly Light depth. Ask user if ambiguous.
+Default to Step-by-step unless the approved plan explicitly selects Light/Single-pass.
 
-## On Activation
+## Activation
 
-### Step 1: Load Plan
-1. Check `_bmad/config.toml` → `[core].active_initiative`
-2. If set, read the plan:
-   - Light/Standard: `docs/tasks/{initiative}.md`
-   - Full: `_bmad-output/spec-{initiative}/spec-{initiative}.md` + companions
-3. If not set, ask user which plan to build
-4. If plan status is not `**Status:** Approved`, stop and ask user to approve it first
+1. Read repository root/IDE instructions and `_bmad/config.toml`; follow the configured context map for project state, codebase map, build/test commands, and constraints.
+2. Resolve the active plan from the path supplied by the user/`/start-flow` or the configured `[paths.stories_dir]` and `[paths.output_dir]`. Use `[core].active_initiative` only when explicitly resuming that Initiative.
+3. Confirm the plan is `Approved`. If no plan exists, only create one through the Quick Flow procedure above; Full Flow without approved artifacts stops and routes to `/bmad-plan`.
+4. Inspect the worktree and current branch. Preserve unrelated changes. If changes overlap the task, ask before editing; do not stash or stage automatically.
+5. Run the project's documented baseline build/check when applicable and available. Report environment blockers rather than inventing replacement commands.
+6. Load the implementation persona from `[paths].agents_dir` as configured in `_bmad/config.toml`.
+7. Verify the Story/Bug ID matches the registry, parent child list, plan filename, and branch. If it is absent or mismatched, stop and route to `/start-flow` or `/bmad-decompose`; Build must not invent or silently change an ID.
+8. When implementation begins, set the work-item row to `In Progress` in `[paths].work_items_file`; the plan remains `Approved` until implementation and its verification are complete.
 
-### Step 2: Load Context
-Read these files for implementation context:
-1. `.github/copilot-instructions.md` — project conventions, solution layout, build/run
-2. `docs/CODEBASE_MAP.md` — file-by-file component map (will need updating after)
-3. The plan file itself — re-read to internalize every step
+## Execute and Verify
 
-### Step 3: Adopt Persona
-Load `.github/agents/amelia-dev.md` — Amelia the Developer. Embody her principles:
-1. **Spec fidelity** — implement exactly what's specified, nothing more
-2. **Build discipline** — `dotnet build src/PokemonRedRL.sln` after each step (Full route)
-3. **Tensor safety** — wrap TorchSharp tensors in `using`/`DisposeScope`
-4. **Language matching** — Russian comments stay Russian; new files default to English
-5. **DI consistency** — register new services in `Program.cs` following existing patterns
+For each step:
 
-### Step 4: Pre-Flight Check
-Before writing any code:
-- [ ] Plan is approved (status check)
-- [ ] All dependencies are available (NuGet packages, Redis, mGBA)
-- [ ] Working directory is clean (no uncommitted changes that would conflict)
-- [ ] `dotnet build src/PokemonRedRL.sln` passes on current code
+1. Read the affected code and its callers.
+2. For behavior changes, add or update a focused failing test before the implementation when the existing test infrastructure supports it. If test-first is impractical, use the approved alternative verification and state why; do not install a framework or expand scope here.
+3. Make only the approved change.
+4. Run focused verification from the project instructions/plan.
+5. If verification fails, diagnose and repair only the in-scope change, then rerun the same check. If blocked or requirements are invalidated, stop and use `/bmad-correct-course`.
+6. Mark the plan step complete only when its verification passes; report the result.
 
-### Step 5: Execute (Full Route)
+Before finalizing:
 
-For each unchecked step in the plan:
+- Confirm all approved capabilities and acceptance signals are covered.
+- Check the project-specific resource lifecycle, dependency wiring, protocol/data contracts, and documentation rules identified in context.
+- Update the configured codebase map when files or components moved/changed structurally.
+- Set the plan status to `Implemented`; leave review, archive, commit, and merge to their separate commands.
 
-```
-┌─────────────────────────────────────────┐
-│ 1. READ    — Read all files the step touches │
-│ 2. PLAN    — Mental diff: what changes where │
-│ 3. IMPLEMENT — Make the change              │
-│ 4. BUILD   — dotnet build src/PokemonRedRL.sln │
-│ 5. FIX     — If build fails, fix and rebuild │
-│ 6. MARK    — Mark step [x] in plan          │
-│ 7. REPORT  — Brief summary to user          │
-└─────────────────────────────────────────┘
-```
-
-**Checkpoint rule:** After every 3 steps (or at any natural boundary), pause and ask: "Continue to next step?" This prevents runaway implementation.
-
-**Build failure protocol:**
-1. Read the error
-2. Fix only what's needed to resolve the error
-3. Rebuild
-4. If same error persists after 2 attempts, report to user with context — don't loop
-5. Never suppress errors with `#pragma warning disable` without user approval
-
-### Step 5 (Oneshot Route)
-
-For light plans:
-1. Read all files the plan touches
-2. Implement all changes
-3. `dotnet build src/PokemonRedRL.sln`
-4. Fix any build errors
-5. Mark all steps `[x]`
-
-### Step 6: Finalize
-
-After all steps are complete:
-- [ ] `dotnet build src/PokemonRedRL.sln` passes with no new errors or warnings
-- [ ] Update `docs/CODEBASE_MAP.md` if files were added, removed, or moved
-- [ ] Update plan status: `**Status:** Implemented`
-- [ ] If full depth, append to `.memlog.md`: `<timestamp> | event | Implementation complete. Build passes.`
-- [ ] **Update `docs/PROJECT_SPEC.md`:** If this task is in the Active Epic table, update its status to `🔄 In Progress` (build started) or keep as-is (build doesn't change status — only review/commit do)
-- [ ] Suggest next step: `/bmad-review`
-
-## Rules
-
-1. **No scope creep.** If you see an unrelated improvement, note it for later — don't implement it now.
-2. **Build after each step** (Full route). A step that doesn't build is not complete.
-3. **Match existing file language.** Russian comments stay Russian; new files default to English.
-4. **Tensor safety.** Every `torch.Tensor` creation must have a clear disposal path. Use `using`/`DisposeScope`.
-5. **DI registration.** New services go in `Program.cs`, following the existing `AddSingleton`/`AddScoped` pattern.
-6. **Protocol symmetry.** Any new emulator command must be handled on BOTH the C# side AND the Lua side.
-7. **Stop on uncertainty.** If the plan is ambiguous, stop and ask — don't guess.
-
-## After Completion
-
-- Suggest `/bmad-review` for quality check
-- If review finds issues, they become a new plan (back to `/bmad-plan`)
+Never commit, archive, merge, or push in this prompt. After implementation, hand off to `/bmad-review`.

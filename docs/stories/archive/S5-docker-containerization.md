@@ -1,8 +1,9 @@
-# Task 3b — Full project containerization (Docker Compose)
+# S5 — Full project containerization (Docker Compose)
+**ID:** S5 (legacy ID: T3b)
 
 Status: Done
 
-Roadmap source: [roadmap-vision-and-rl-overhaul.md](roadmap-vision-and-rl-overhaul.md), Task 3b. **HARD GATE: blocks Task 4 onward.**
+Roadmap source: [roadmap-vision-and-rl-overhaul.md](../roadmap-vision-and-rl-overhaul.md), Task 3b. **HARD GATE: blocks Task 4 onward.**
 
 ## Goal
 

@@ -1,5 +1,6 @@
-# ADR: Combined Vision + Memory-State Representation for Pokémon Red RL Agent
+# ADR-0001: Combined Vision + Memory-State Representation for Pokémon Red RL Agent
 
+**ID:** ADR-0001
 **Date:** 2026-10-11
 **Status:** Accepted
 **Supersedes:** None (first ADR in this repo)
@@ -9,17 +10,17 @@
 
 The PokemonRedRL agent currently perceives the game through a hand-crafted 14-float memory vector (`StatePreprocessorService.StateToTensor`): HP, MapId, X, Y, Direction, Badges, InTrainerBattle, Money, and 6 PartyLevels. This vector is precise but blind — the agent has no visual awareness of obstacles, NPCs, dialogue boxes, menus, or battle UI.
 
-The [vision-and-rl-overhaul roadmap](../tasks/roadmap-vision-and-rl-overhaul.md) bets that adding computer vision as a supplementary input will improve navigation, exploration, and ultimately the agent's ability to complete the game. The frame capture mechanism is already decided (OS-level `PrintWindow` at ~141-145 Hz, per the [frame-capture spike](../tasks/archive/frame-capture-spike.md)). What remains is the **representation design**: how vision and memory-state coexist as tensor inputs to the neural network.
+The [vision-and-rl-overhaul roadmap](../stories/roadmap-vision-and-rl-overhaul.md) bets that adding computer vision as a supplementary input will improve navigation, exploration, and ultimately the agent's ability to complete the game. The frame capture mechanism is already decided (OS-level `PrintWindow` at ~141-145 Hz, per the [frame-capture spike](../stories/archive/S1-frame-capture-spike.md)). What remains is the **representation design**: how vision and memory-state coexist as tensor inputs to the neural network.
 
-This ADR settles all representation-level decisions so that T6 (vision pipeline) and T8 (dual-modality network) can be implemented independently and compose correctly at the fusion point.
+This ADR settles all representation-level decisions so that S9 (vision pipeline) and S11 (dual-modality network) can be implemented independently and compose correctly at the fusion point.
 
 ### Constraints (non-negotiable)
 
-- **Hybrid CNN+MLP** — pixels are supplementary, not a replacement for memory (per [brainstorm](../_bmad-output/brainstorm-full-architecture-review.md))
+- **Hybrid CNN+MLP** — pixels are supplementary, not a replacement for memory (per [brainstorm](../../_bmad-output/archive/brainstorms/BR-0002-full-architecture-review.md))
 - **84×84 grayscale frames** — per brainstorm decision
-- **TorchSharp-only preprocessing** — `torchvision.transforms`, no OpenCV (T4a already removed it)
-- **Frame capture is OS-level `PrintWindow`** — independent of the Lua TCP bridge (T1 decision)
-- **`VisionEnabled=false` must produce bit-identical behavior to current code** — backward compatibility
+- **TorchSharp-only preprocessing** — `torchvision.transforms`, no OpenCV (S6 already removed it)
+- **Frame capture is OS-level `PrintWindow`** — independent of the Lua TCP bridge (S1 decision)
+- **`Vision.Enabled=false` must produce bit-identical behavior to current code** — backward compatibility
 - **No new NuGet packages** — TorchSharp covers CNN layers and transforms
 - **No Lua protocol changes** — vision is a separate channel
 
@@ -31,7 +32,7 @@ This ADR settles all representation-level decisions so that T6 (vision pipeline)
 | I2 | Tensor allocations in training loops must be disposed within the same iteration |
 | I3 | Redis is the single source of truth for shared experience and hyperparameters |
 | I4 | Vision capture is OS-level, independent of the Lua TCP bridge |
-| I5 | `VisionEnabled=false` path is bit-identical to current code |
+| I5 | `Vision.Enabled=false` path is bit-identical to current code |
 
 ## Decision
 
@@ -135,7 +136,7 @@ graph TD
 
 **Parameter count:** ~1.84M total — modest. For comparison, Atari DQN is ~1.7M (with F=4, 4 actions). For 10 concurrent agents sharing one GPU, this is well within VRAM budget.
 
-### 4. VisionEnabled Feature Flag
+### 4. Vision.Enabled Feature Flag
 
 ```
 appsettings.json:
@@ -148,7 +149,7 @@ appsettings.json:
 
 **DI-level gating, not runtime branching:**
 
-| VisionEnabled | Registered Services | Network |
+| Vision.Enabled | Registered Services | Network |
 |---|---|---|
 | `false` | `IStatePreprocessorService` (existing), `INetworkService` → `MemoryOnlyNetworkService` | `PokeDQN` (existing, unchanged) |
 | `true` | Above + `IVisionPreprocessorService` (real), `IVisionCaptureService` (real), `INetworkService` → `VisionNetworkService` | `PokeVisionDQN` (new, dual-modality) |
@@ -159,7 +160,7 @@ appsettings.json:
 public interface INetworkService
 {
     Tensor Forward(Tensor state, Tensor? frame);
-    // frame is null when VisionEnabled=false
+    // frame is null when Vision.Enabled=false
 }
 ```
 
@@ -171,16 +172,16 @@ Two implementations:
 
 ```csharp
 [Key(7)]
-public byte[]? FrameBytes { get; set; }  // null when VisionEnabled=false
+public byte[]? FrameBytes { get; set; }  // null when Vision.Enabled=false
 ```
 
 Existing experiences without `FrameBytes` deserialize with it as `null` — backward-compatible, no migration needed.
 
-**Backward compatibility (I5):** When `VisionEnabled=false`:
+**Backward compatibility (I5):** When `Vision.Enabled=false`:
 - `MemoryOnlyNetworkService.Forward(state, null)` → `PokeDQN.Forward(state)` — identical to today
 - `StatePreprocessorService.StateToTensor(state)` — identical to today
 - No frame capture, no frame processing, no `FrameBytes` storage
-- Bit-identical behavior to pre-T4 code
+- Bit-identical behavior to pre-S7 code
 
 ### 5. A/B Test Protocol
 
@@ -273,28 +274,28 @@ Existing experiences without `FrameBytes` deserialize with it as `null` — back
 
 ### Positive
 
-- **T6 and T8 can be implemented independently.** The shape contract (CNN outputs 512-d, MLP outputs 64-d, fusion at 576→256→6) is the interface between the vision pipeline and the network. As long as both sides respect it, they compose correctly.
-- **Backward compatible.** `VisionEnabled=false` produces bit-identical behavior to current code. Safe to merge without disrupting existing training.
+- **S9 and S11 can be implemented independently.** The shape contract (CNN outputs 512-d, MLP outputs 64-d, fusion at 576→256→6) is the interface between the vision pipeline and the network. As long as both sides respect it, they compose correctly.
+- **Backward compatible.** `Vision.Enabled=false` produces bit-identical behavior to current code. Safe to merge without disrupting existing training.
 - **A/B testable.** The protocol provides a concrete, falsifiable test of whether vision helps. No subjective judgment needed.
-- **Extensible.** Frame-stack depth, embedding sizes, and normalization can all be tuned without architecture changes. The `Vision` config section grows naturally as T6 adds capture parameters.
+- **Extensible.** Frame-stack depth, embedding sizes, and normalization can all be tuned without architecture changes. The `Vision` config section grows naturally as S9 adds capture parameters.
 
 ### Negative
 
 - **~1.84M params** — larger than the current ~10K MLP. Training will be slower per step, though the richer input should improve sample efficiency.
 - **`INetworkService` abstraction** adds an interface and two implementations — more files, more DI registrations. Worth it for clean gating, but adds complexity.
-- **`FrameBytes` on `ModelExperience`** increases Redis storage per experience when vision is enabled. T8 will need to address storage strategy (likely separate frame keys with TTL).
+- **`FrameBytes` on `ModelExperience`** increases Redis storage per experience when vision is enabled. S11 will need to address storage strategy (likely separate frame keys with TTL).
 - **Normalization constants in `StatePreprocessorService` remain ad hoc** (`x/20f`, `y/20f`). This ADR does not fix them — that's a separate cleanup task. The known issue is documented in the code and in `PROJECT_OVERVIEW.md` §5.
 
 ### Neutral / Notes
 
 - The CNN architecture (Atari DQN standard) is a starting point. If training reveals that 3 Conv2d layers are too shallow for Pokémon's visual complexity, adding residual connections or increasing depth is a future optimization — not a design change.
 - The A/B test protocol uses Route 3 as the milestone. If the agent never reaches Route 3 in 50 episodes (unlikely but possible), the milestone can be downgraded to Viridian City (Route 1 exit) — a simpler navigation task.
-- This ADR does not specify the RL algorithm (DQN, Double DQN, Dueling, PPO). The fusion point (before the Q-head) is algorithm-agnostic — T5 will decide the algorithm, and the representation design here works with any of them.
+- This ADR does not specify the RL algorithm (DQN, Double DQN, Dueling, PPO). The fusion point (before the Q-head) is algorithm-agnostic — S8 will decide the algorithm, and the representation design here works with any of them.
 
 ## Migration Path
 
 This is a design-only ADR — no code changes. Implementation order:
 
-1. **T6 (Vision project + frame pipeline):** Implement `IVisionPreprocessorService` producing `[2×84×84]` tensors per this ADR. Implement `IVisionCaptureService` using `PrintWindow`. Add `Vision` config section to `appsettings.json`.
-2. **T8 (Dual-modality network):** Implement `PokeVisionDQN` with the CNN+MLP+fusion architecture specified here. Implement `INetworkService` and both implementations. Wire up DI gating in `Program.cs`.
-3. **T9 (Vision-aware reward shaping):** Use frame embeddings for novelty/progress signals — out of scope for this ADR.
+1. **S9 (Vision project + frame pipeline):** Implement `IVisionPreprocessorService` producing `[2×84×84]` tensors per this ADR. Implement `IVisionCaptureService` using `PrintWindow`. Add `Vision` config section to `appsettings.json`.
+2. **S11 (Dual-modality network):** Implement `PokeVisionDQN` with the CNN+MLP+fusion architecture specified here. Implement `INetworkService` and both implementations. Wire up DI gating in `Program.cs`.
+3. **S12 (Vision-aware reward shaping):** Use frame embeddings for novelty/progress signals — out of scope for this ADR.
