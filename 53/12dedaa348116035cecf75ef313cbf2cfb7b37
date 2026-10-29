@@ -1,0 +1,25 @@
+.github/prompts/bmad-merge.prompt.md
+  s_e18a3fb7d07f93::t_abb5bdae42514c 2,7,32,40-49
+docs/BMAD-WORKFLOW.md
+  s_e18a3fb7d07f93::t_d53a5b1ed16d22 59,71
+docs/PROJECT_SPEC.md
+  s_e18a3fb7d07f93::t_74fa3e69323327 122
+docs/stories/archive/S21-copilot-bmad-workflow.md
+  s_e18a3fb7d07f93::t_3a46187a6c4abd 23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "5312dedaa348116035cecf75ef313cbf2cfb7b37",
+  "prompts": {},
+  "sessions": {
+    "s_e18a3fb7d07f93": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "6e32ade6-cd95-42cc-9dc7-789e94f84c04",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    }
+  }
+}
