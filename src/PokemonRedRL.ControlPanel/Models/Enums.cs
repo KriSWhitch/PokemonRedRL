@@ -7,7 +7,7 @@ public enum LaunchMode
     ManualAttach,
 
     /// <summary>Control panel starts the mGBA process and injects the bridge script automatically.
-    /// Currently unavailable — see Step 3 finding in docs/tasks/automated-mgba-launch-and-fast-forward.md.</summary>
+    /// Currently unavailable — see Step 3 finding in docs/stories/archive/S3-controlpanel-mvp.md.</summary>
     AutomatedLaunch
 }
 

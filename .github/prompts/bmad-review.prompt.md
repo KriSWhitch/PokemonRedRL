@@ -1,173 +1,81 @@
 ---
-description: 'Multi-lens quality review of implemented changes. Runs 6 parallel review passes: spec adherence, build, regression, tensor leaks, code quality, documentation. Produces structured report with verdict.'
+description: 'Mandatory acceptance review for planned changes. Checks plan/acceptance adherence, documented verification, project integration contracts, resource lifecycle, and records; produces a verdict.'
 ---
 
-# BMAD Review — Multi-Lens Review Phase
+# BMAD Review — Acceptance Gate
 
-## Overview
+Verify whether an implemented change satisfies its approved plan and is ready to archive. This is the required acceptance gate in the delivery flow; it is not a broad source-code audit. Use the optional `/bmad-code-review` for an explicitly requested or separately approved correctness/performance/security/testability review.
 
-You are the quality gate for PokemonRedRL. You take **implemented changes** (from `bmad-build`) and inspect them through **six independent lenses**, each looking for a different class of problem. You produce a **structured report** with a clear verdict: pass, pass with notes, or blocked.
+## Load Context and Scope
+
+1. Read the repository's root/IDE instructions. Resolve the plan and code-map paths from `_bmad/config.toml [paths]`; read `[paths].work_items_file` for parent/status/dependencies, and Project Spec for technical context only.
+2. Resolve review scope from the user's request or `/start-flow`: active Story plan and diff. If no approved plan exists, stop and recommend `/bmad-code-review` for an explicitly requested standalone code review or `/bmad-plan` for unplanned work.
+3. Read the approved plan, its companions, the changed files, and project-specific acceptance/integration rules. Never assume a language, runtime, test command, resource type, or status vocabulary.
 
 ## Review Lenses
 
-Each lens is an independent review pass. Run them all, then merge findings.
+Run all applicable lenses and combine findings without duplication:
 
-### Step 0: Adopt Persona
-Before running lenses, load `.github/agents/quinn-qa.md` — Quinn the QA Engineer 🧪. Embody: evidence-based findings with reproduction steps, invariants over exact outputs, regression-first mindset, silent-failure detection.
+### 1. Plan and Acceptance
 
-### Lens 1: Specification Adherence
-**Question:** Does the implementation match the plan?
+- Map every capability and acceptance signal to implementation and evidence.
+- Identify missed requirements, unapproved scope, and plan steps not completed.
+- Flag changed assumptions or architecture that should go through `/bmad-correct-course`.
+- For each behavior-changing acceptance signal, trace at least one changed path from its entry point through the relevant state/contract to an observable result. Include the relevant boundary or failure scenario when specified by the plan; do not claim coverage from a passing build alone.
 
-- Read the plan from `docs/tasks/<slug>.md` or `_bmad-output/spec-<slug>/`
-- Walk the plan's steps/capabilities one by one
-- For each: is it implemented? Is the implementation faithful?
-- Flag: missing steps, extra changes not in the plan, different approach than specified
-- **Severity:** Missing capability = HIGH. Extra change = MEDIUM. Different approach = depends.
+### 2. Verification Evidence
 
-### Lens 2: Build & Compilation
-**Question:** Does it compile cleanly?
+- Run only build/test/check commands documented by the project and relevant to the change.
+- Check the plan's required tests, including any approved manual procedures.
+- Distinguish passed, failed, skipped, unavailable, and not run. Do not mark an unavailable check as passed.
 
-- Run `dotnet build src/PokemonRedRL.sln`
-- Check for: errors (BLOCKER), warnings (note them), new warnings vs baseline
-- If test project exists: `dotnet test`
-- **Severity:** Build error = BLOCKER. New warning = LOW.
+### 3. Regression and Compatibility
 
-### Lens 3: Regression Risk
-**Question:** What existing functionality could this break?
+- Trace changed public contracts, callers, configuration, persistence, protocols, and migrations identified by project context.
+- Check compatibility and failure behavior at affected boundaries.
+- Flag a breaking change without an approved migration path.
 
-- Check DI registrations in `Program.cs` — any removed or changed?
-- Check interface changes — any method signatures changed?
-- Check config changes — any keys removed or renamed?
-- Check Lua protocol — any command format changes?
-- Check Redis schema — any key pattern changes?
-- Flag any breaking change with affected callers
-- **Severity:** Breaking change without migration path = HIGH.
+### 4. Resource Lifecycle
 
-### Lens 4: Tensor Leaks (TorchSharp-specific)
-**Question:** Are tensors properly disposed?
+- Apply lifecycle rules defined by project instructions (for example memory, handles, transactions, streams, or framework-managed resources when relevant).
+- Trace ownership and cleanup on success, error, and cancellation paths.
+- Do not impose library-specific checks that are not applicable to this project/change.
 
-- Scan all changed files for `torch.tensor(`, `torch.zeros(`, `torch.ones(`, `torch.rand(`, `torch.randn(`, `.to_device(`
-- For each allocation: is there a `using` block, `DisposeScope`, or explicit `.Dispose()`?
-- Flag allocations without disposal path
-- **Severity:** Tensor leak in training loop = HIGH. One-off leak = MEDIUM.
+### 5. Project Integration Contracts
 
-### Lens 5: Code Quality & Consistency
-**Question:** Does the code match project standards?
+- Check dependency wiring/lifetimes, shared schemas, APIs/protocols, configuration, and deployment integration only where affected.
+- Verify producer/consumer changes remain coordinated across documented components.
+- Leave general style, performance, and security auditing to `/bmad-code-review` unless a specific project contract is violated.
 
-- Style: matches surrounding code? (naming, indentation, patterns)
-- Language: Russian comments in Russian files, English in new files?
-- Error handling: are exceptions caught appropriately? No empty catch blocks?
-- Logging: are significant operations logged?
-- DI: new services registered with correct lifetime (Singleton vs Scoped)?
-- **Severity:** Style violation = LOW. Missing error handling = MEDIUM.
+### 6. Records and Documentation
 
-### Lens 6: Documentation & Map
-**Question:** Is the documentation updated?
+- Check that project maps and documentation listed by context are updated for structural or behavioral changes.
+- Verify plan status and required decision logs follow the repository's configured workflow.
+- Do not invent status labels or move/archive records in this command.
 
-- `docs/CODEBASE_MAP.md` — any new/removed/moved files not reflected?
-- New public methods/properties — are they documented?
-- Plan status — updated to `Implemented`?
-- `.memlog.md` (full depth) — implementation event recorded?
-- **Severity:** Missing map update = MEDIUM. Missing docs = LOW.
+## Findings and Verdict
 
-## On Activation
+Report findings with file/line or acceptance-criterion references. Each finding includes severity, trigger, impact, and a concise suggested action. Report real issues only; a clean lens is valid.
 
-### Step 1: Identify What to Review
-1. Check `_bmad/config.toml` → `[core].active_initiative`
-2. If set, review that initiative
-3. If not set, ask user: "What should I review?" (a plan slug, unstaged changes, a specific file, a branch)
-
-### Step 2: Gather Context
-Read:
-- The plan file (if reviewing against a plan)
-- `.github/copilot-instructions.md` (project conventions)
-- `docs/CODEBASE_MAP.md` (current file map)
-- Changed files (use git diff or read files directly)
-
-### Step 3: Run All Lenses
-Execute each lens independently. Collect findings.
-
-### Step 4: Classify & Merge
-For each finding, assign:
-- **Lens:** Which lens found it
-- **Severity:** BLOCKER > HIGH > MEDIUM > LOW
-- **Action:** What needs to happen
-
-Merge duplicate findings (same root cause found by multiple lenses).
-
-### Step 5: Determine Verdict
-
-| Verdict | Condition |
+| Severity | Meaning |
 |---|---|
-| ✅ **Pass** | No BLOCKER or HIGH findings |
-| ⚠️ **Pass with Notes** | MEDIUM findings only, no BLOCKER/HIGH |
-| ❌ **Blocked** | Any BLOCKER finding |
+| BLOCKER | Prevents safe or meaningful use; likely critical failure or data loss |
+| HIGH | Incorrect behavior, failed acceptance, or major compatibility/reliability risk |
+| MEDIUM | Meaningful verification, integration, or maintainability gap |
+| LOW | Non-blocking documentation or clarity issue |
 
-### Step 6: Produce Report
+Verdict:
 
-```markdown
-# Review: <slug>
-**Date:** <today>
-**Reviewed against:** <plan file or "unstaged changes">
-**Verdict:** ✅ Pass / ⚠️ Pass with notes / ❌ Blocked
+- **Pass:** no BLOCKER/HIGH findings and all required verification passed.
+- **Pass with Notes:** no BLOCKER/HIGH findings; remaining MEDIUM/LOW findings are explicit.
+- **Blocked:** any BLOCKER/HIGH finding or required verification failed.
 
-## Summary
-<One paragraph — what was reviewed, overall assessment>
+Present the findings first, then the verdict and verification evidence. Do not fix findings in this command.
 
-## Findings
+## Handoff and Records
 
-| # | Lens | Severity | File/Area | Description | Action |
-|---|---|---|---|---|---|
-| 1 | Spec | HIGH | `Foo.cs` | CAP-3 not implemented | Implement CAP-3 |
-| 2 | Tensor | MEDIUM | `Trainer.cs:42` | `torch.zeros(...)` not disposed | Wrap in `using` |
-
-## Lens Details
-
-### Lens 1: Specification Adherence
-- ✅ CAP-1: Implemented as specified
-- ✅ CAP-2: Implemented as specified
-- ❌ CAP-3: Missing — `UpdatePriorities` method not added
-
-### Lens 2: Build & Compilation
-- ✅ `dotnet build` passes
-- ⚠️ 2 new warnings: CS8618 (non-nullable property)
-
-### Lens 3: Regression Risk
-- ✅ No breaking changes detected
-- ✅ DI registrations unchanged
-
-### Lens 4: Tensor Leaks
-- ⚠️ 1 potential leak in `Trainer.cs:42`
-
-### Lens 5: Code Quality
-- ✅ Style matches surrounding code
-- ✅ Error handling adequate
-
-### Lens 6: Documentation
-- ❌ `docs/CODEBASE_MAP.md` not updated (new file `Foo.cs`)
-
-## Action Items
-- [ ] HIGH: Implement CAP-3 (`UpdatePriorities` in `Foo.cs`)
-- [ ] MEDIUM: Wrap `torch.zeros` in `using` block (`Trainer.cs:42`)
-- [ ] MEDIUM: Update `docs/CODEBASE_MAP.md` with new file `Foo.cs`
-```
-
-### Step 7: Recommendation
-- ✅ **Pass** → Suggest `/bmad-commit`
-- ⚠️ **Pass with Notes** → Fix MEDIUM items at user's discretion, then `/bmad-commit`
-- ❌ **Blocked** → Fix BLOCKER/HIGH items, then re-review. Suggest creating a new plan for the fixes if non-trivial.
-
-### Step 8: Update PROJECT_SPEC.md
-
-After the review report is complete:
-- Open `docs/PROJECT_SPEC.md`
-- If this task is in the Active Epic table: update its status to `✅ Reviewed` (if Pass/Pass with Notes) or keep current status (if Blocked)
-- Update `**Last updated:**` to today's date
-
-## Rules
-
-1. **Each lens is independent.** Don't let findings from one lens influence another.
-2. **Be specific.** Every finding must reference a file, line, or capability ID.
-3. **Severity is about impact, not effort.** A one-line fix can be HIGH severity if it breaks the build.
-4. **Don't fix — report.** The review identifies problems; fixing them is a separate step (back to `bmad-plan`/`bmad-build`).
-5. **Tensor leaks are always at least MEDIUM.** In training loops, they're HIGH.
+- **Pass:** recommend `/bmad-archive`.
+- **Pass with Notes:** ask the user to resolve or explicitly defer notes, then recommend `/bmad-archive`.
+- **Blocked:** direct in-scope fixes to `/bmad-build`; material scope/requirement changes to `/bmad-correct-course`; then rerun `/bmad-review`.
+- Update the Story plan's review status and set the matching WORK_ITEMS row to `Reviewed` after a passing verdict. Do not mark the Story complete here; `/bmad-commit` owns the `Done` status.
+- Do not archive, commit, merge, or push in this command.

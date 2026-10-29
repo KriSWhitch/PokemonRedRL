@@ -1,5 +1,6 @@
-# ADR: RL Algorithm Selection — Double DQN + Dueling Heads + Noisy Nets
+# ADR-0002: RL Algorithm Selection — Double DQN + Dueling Heads + Noisy Nets
 
+**ID:** ADR-0002
 **Date:** 2026-10-11
 **Status:** Accepted
 **Supersedes:** None
@@ -7,7 +8,7 @@
 
 ## Context
 
-The PokemonRedRL agent currently uses Double DQN with prioritized experience replay, epsilon-greedy exploration, and multi-agent weight sharing via Redis. This setup was chosen as a reasonable starting point but was never benchmarked against alternatives. Before building the dual-modality `PokeVisionDQN` network (T8), we need a deliberate, evidence-based decision on the RL algorithm. Changing the algorithm after T8 would mean rebuilding the trainer and possibly the network architecture.
+The PokemonRedRL agent currently uses Double DQN with prioritized experience replay, epsilon-greedy exploration, and multi-agent weight sharing via Redis. This setup was chosen as a reasonable starting point but was never benchmarked against alternatives. Before building the dual-modality `PokeVisionDQN` network (S11), we need a deliberate, evidence-based decision on the RL algorithm. Changing the algorithm after S11 would mean rebuilding the trainer and possibly the network architecture.
 
 The evaluation must respect these **spine invariants**:
 
@@ -18,7 +19,7 @@ The evaluation must respect these **spine invariants**:
 | I3 | Redis is single source of truth for shared experience | Rules out on-policy algorithms that can't use off-policy replay |
 | I4 | Multi-agent: N independent agents sharing via Redis | Rules out central-learner architectures |
 | I5 | Vision capture is OS-level, independent of Lua bridge | Algorithm doesn't affect vision pipeline |
-| I6 | `VisionEnabled=false` must remain bit-identical | Algorithm changes must not break memory-only fallback |
+| I6 | `Vision.Enabled=false` must remain bit-identical | Algorithm changes must not break memory-only fallback |
 | I7 | No new NuGet packages | Must be implementable with TorchSharp 0.107 alone |
 
 ### Current Algorithm (confirmed from code)
@@ -38,7 +39,7 @@ The current implementation in `DQNTrainer.cs` is a correct **Double DQN**:
 
 ## Decision
 
-**Adopt Double DQN + Dueling Heads + Noisy Nets as the RL algorithm for the vision-enabled agent (T8).**
+**Adopt Double DQN + Dueling Heads + Noisy Nets as the RL algorithm for the vision-enabled agent (S11).**
 
 This is an incremental improvement on the current baseline — keep what works, add two high-impact, low-cost Rainbow components:
 
@@ -79,7 +80,7 @@ Noisy nets learn *state-dependent* exploration: the network reduces noise in fam
 
 | Component | Verdict | Rationale |
 |---|---|---|
-| **N-step returns** | ⚠️ Defer | Requires agent-local trajectory buffers — conflicts with shared Redis replay. Revisit after T8. |
+| **N-step returns** | ⚠️ Defer | Requires agent-local trajectory buffers — conflicts with shared Redis replay. Revisit after S11. |
 | **Distributional RL** | ❌ Reject | High implementation complexity (new output head, loss function, training step). Modest benefit at our scale. |
 | **Combined Rainbow** | ❌ Reject | Incremental adoption is safer — measure each component's impact. |
 | **PPO** | ❌ Reject | On-policy — conflicts with invariants I3 (Redis shared replay) and I4 (multi-agent sharing). Requires separate epic. |
@@ -96,9 +97,9 @@ Noisy nets learn *state-dependent* exploration: the network reduces noise in fam
 **Cons:**
 - ε-greedy is state-blind — explores equally in Pallet Town and Viridian Forest
 - No dueling heads — network must learn that actions don't matter in many states
-- Leaves known improvements on the table before locking in T8 architecture
+- Leaves known improvements on the table before locking in S11 architecture
 
-**Why rejected:** The cost of adding dueling heads + noisy nets is low (~70 lines total). The benefit is well-established in literature. Doing it now, before T8 builds the dual-modality network, avoids rework.
+**Why rejected:** The cost of adding dueling heads + noisy nets is low (~70 lines total). The benefit is well-established in literature. Doing it now, before S11 builds the dual-modality network, avoids rework.
 
 ### Alternative 2: Full Rainbow DQN
 
@@ -110,7 +111,7 @@ Noisy nets learn *state-dependent* exploration: the network reduces noise in fam
 - N-step returns conflict with Redis shared replay architecture
 - Distributional RL adds major complexity to training loop
 - Combined Rainbow is harder to debug — which component helped?
-- Higher implementation risk for T8 timeline
+- Higher implementation risk for S11 timeline
 
 **Why rejected:** Incremental adoption is safer. Adopt the two highest-impact, lowest-cost components now. Measure their impact. Add n-step returns and distributional RL later if needed.
 
@@ -128,7 +129,7 @@ Noisy nets learn *state-dependent* exploration: the network reduces noise in fam
 - **Network size** — actor + critic = ~2× params (~3.7M for dual-modality)
 - **Architectural changes** — new training loop, new buffer system, new loss function
 
-**Why rejected:** PPO violates invariants I3 and I4. It's not an incremental improvement — it's a different architecture. If PPO is desired, it should be a separate epic with its own multi-agent design. The T16 spike (PPO + LSTM, post-epic) is the right place to evaluate it.
+**Why rejected:** PPO violates invariants I3 and I4. It's not an incremental improvement — it's a different architecture. If PPO is desired, it should be a separate epic with its own multi-agent design. The S19 spike (PPO + LSTM, post-epic) is the right place to evaluate it.
 
 ## Consequences
 
@@ -139,7 +140,7 @@ Noisy nets learn *state-dependent* exploration: the network reduces noise in fam
 - **Fewer hyperparameters.** ε-greedy has 3 parameters (start, end, decay). Noisy nets have 1 (σ₀). Less tuning, more robust.
 - **Incremental.** Both changes are additive — the core Double DQN training loop is unchanged. If noisy nets don't work, revert to ε-greedy in one commit.
 - **VRAM-friendly.** Dueling heads add ~64 params. Noisy nets double the MLP params (~20K→~41K). Total impact: ~21K additional params — negligible.
-- **T8-ready.** The algorithm decision is settled. T8 can build `PokeVisionDQN` with dueling heads and `NoisyLinear` layers from day one.
+- **S11-ready.** The algorithm decision is settled. S11 can build `PokeVisionDQN` with dueling heads and `NoisyLinear` layers from day one.
 
 ### Negative
 
@@ -149,9 +150,9 @@ Noisy nets learn *state-dependent* exploration: the network reduces noise in fam
 
 ### Neutral / Notes
 
-- **N-step returns** are deferred, not rejected. After T8 ships, we can implement a local n-step buffer per agent (separate from Redis) and measure the impact. This is a natural follow-up task.
+- **N-step returns** are deferred, not rejected. After S11 ships, we can implement a local n-step buffer per agent (separate from Redis) and measure the impact. This is a natural follow-up task.
 - **Distributional RL** is rejected for now but may become more valuable as the agent tackles later-game challenges with higher variance (gym battles, legendary encounters).
-- **PPO** is rejected for this epic but the T16 spike remains the right place to evaluate it. If PPO shows dramatically better sample efficiency on Pokémon Red, a future epic can redesign the multi-agent architecture around it.
+- **PPO** is rejected for this epic but the S19 spike remains the right place to evaluate it. If PPO shows dramatically better sample efficiency on Pokémon Red, a future epic can redesign the multi-agent architecture around it.
 
 ## GPU/VRAM Budget
 
@@ -190,7 +191,7 @@ Noisy nets learn *state-dependent* exploration: the network reduces noise in fam
 
 ## Migration Path
 
-### T8 Implementation Order
+### S11 Implementation Order
 
 1. **Create `NoisyLinear` module** in `PokemonRedRL.Models.ReinforcementLearning/NoisyLinear.cs`:
    ```csharp
@@ -201,7 +202,7 @@ Noisy nets learn *state-dependent* exploration: the network reduces noise in fam
    }
    ```
 
-2. **Add dueling heads to `PokeDQN`** (and `PokeVisionDQN` in T8):
+2. **Add dueling heads to `PokeDQN`** (and `PokeVisionDQN` in S11):
    ```csharp
    // Replace: Linear(64, 6)
    // With:
@@ -222,4 +223,4 @@ Noisy nets learn *state-dependent* exploration: the network reduces noise in fam
 
 6. **Add `ResetNoise()` method** to `PokeDQN` — called at the start of each episode to resample noise.
 
-7. **Verify backward compatibility (I6):** `VisionEnabled=false` path uses the same dueling+noisy `PokeDQN`. Input/output contract (14→6) unchanged. Existing Redis experiences compatible.
+7. **Verify backward compatibility (I6):** `Vision.Enabled=false` path uses the same dueling+noisy `PokeDQN`. Input/output contract (14→6) unchanged. Existing Redis experiences compatible.

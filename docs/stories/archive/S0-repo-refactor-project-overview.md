@@ -1,4 +1,5 @@
-# Full repository structural refactor + PROJECT_OVERVIEW documentation
+# S0 — Full repository structural refactor + PROJECT_OVERVIEW documentation
+**ID:** S0
 
 Status: Done
 
@@ -62,7 +63,7 @@ Full solution build: **0 errors**, warnings unchanged from baseline (all pre-exi
 
 **Documentation**
 - Added `docs/PROJECT_OVERVIEW.md` (motivation, RL approach, project-boundary rationale, bridge protocol + its constraints, design tradeoffs, and a "Known gaps/open questions" section).
-- Regenerated `docs/CODEBASE_MAP.md` to reflect the namespace fixes, corrected Lua-script descriptions (authoritative vs. legacy vs. vendored), and the new `docs/PROJECT_OVERVIEW.md`/`docs/tasks/` entries.
+- Regenerated `docs/CODEBASE_MAP.md` to reflect the namespace fixes, corrected Lua-script descriptions (authoritative vs. legacy vs. vendored), and the new `docs/PROJECT_OVERVIEW.md`/`docs/stories/` entries.
 - Linked `docs/PROJECT_OVERVIEW.md` from `.github/copilot-instructions.md`.
 
 **Not changed (documented, not fixed — see `docs/PROJECT_OVERVIEW.md` §6):** the `RewardCalculatorService` badge/level reward bug candidate, the duplicate `IExperienceRepository` DI registration, the two diverged `mgba_socket.lua` protocols, the apparently-unused `ExperienceReplay`/`MemoryCache`/`SumTree` classes, the hardcoded absolute Lua `package.path`, and `DQNTrainer.SelectAction`'s per-call `new Random()`.

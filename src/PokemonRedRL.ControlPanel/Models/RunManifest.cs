@@ -3,7 +3,7 @@ namespace PokemonRedRL.ControlPanel.Models;
 /// <summary>
 /// Persisted description of one control-panel run: the ROM/launch/speed settings shared by
 /// the run plus the list of agent slots it manages. Saved as JSON at
-/// &lt;RunOutputDirectory&gt;/manifest.json (see docs/tasks/automated-mgba-launch-and-fast-forward.md, Step 5).
+/// &lt;RunOutputDirectory&gt;/manifest.json (see docs/stories/archive/S3-controlpanel-mvp.md, Step 5).
 /// </summary>
 public class RunManifest
 {

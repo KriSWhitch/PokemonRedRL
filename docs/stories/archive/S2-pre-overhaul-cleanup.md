@@ -1,8 +1,9 @@
-# Task 2 — Pre-overhaul cleanup of known debt
+# S2 — Pre-overhaul cleanup of known debt
+**ID:** S2 (legacy ID: T2)
 
 Status: Done
 
-> Sub-task of [docs/tasks/roadmap-vision-and-rl-overhaul.md](roadmap-vision-and-rl-overhaul.md) (Task 2), **narrowed per user decision**: multi-instance launch automation (`launch_agents.bat`) and programmatic fast-forward wiring — both confirmed unsolved by the Task 1 spike (no CLI/config solution found; GUI automation via `SendInput`/`keybd_event` did not work reliably) — are **split into a separate follow-up task**, not planned here. This task covers only the straightforward, well-understood cleanup items from `docs/PROJECT_OVERVIEW.md` §6.
+> Sub-task of [docs/stories/roadmap-vision-and-rl-overhaul.md](../roadmap-vision-and-rl-overhaul.md) (Task 2), **narrowed per user decision**: multi-instance launch automation (`launch_agents.bat`) and programmatic fast-forward wiring — both confirmed unsolved by the Task 1 spike (no CLI/config solution found; GUI automation via `SendInput`/`keybd_event` did not work reliably) — are **split into a separate follow-up task**, not planned here. This task covers only the straightforward, well-understood cleanup items from `docs/PROJECT_OVERVIEW.md` §6.
 
 ## Goal
 
@@ -17,7 +18,7 @@ Resolve the known-debt items recorded in `docs/PROJECT_OVERVIEW.md` §6 that wou
 - `src/PokemonRedRL.Utils/PokemonRedRL.Utils.csproj`, `src/PokemonRedRL.Core/PokemonRedRL.Core.csproj`, `src/PokemonRedRL.Agent/PokemonRedRL.Agent.csproj` — remove unused `Parquet.Net` `PackageReference` (keep it only in `PokemonRedRL.Models`, where `ModelExperience.cs` actually uses `[ParquetIgnore]`).
 - `docs/PROJECT_OVERVIEW.md` — update §4 (remove "two diverged copies" language once one is deleted) and §6 (move fixed items out of the known-gaps list).
 - `docs/CODEBASE_MAP.md` — regenerate via `/cartograph` (file removed, package references changed).
-- `docs/tasks/roadmap-vision-and-rl-overhaul.md` — tick Task 2 (narrowed), insert a new Task 2b placeholder for the split-out launch-automation/fast-forward work.
+- `docs/stories/roadmap-vision-and-rl-overhaul.md` — tick Task 2 (narrowed), insert a new Task 2b placeholder for the split-out launch-automation/fast-forward work.
 
 ## Steps
 
@@ -27,7 +28,7 @@ Resolve the known-debt items recorded in `docs/PROJECT_OVERVIEW.md` §6 that wou
 - [x] **4. Fix the hardcoded absolute Lua path** in `src/mGBA-0.10.5-win64/scripts/mgba_socket.lua`'s `package.path`/`package.cpath` (currently hardcoded to `D:\Programming\PokemonRedRL\...`) to derive the script's own directory at runtime (e.g. via `debug.getinfo(1, "S").source`) instead of a hardcoded absolute path. **Requires a manual mGBA smoke test** (launch a real instance, confirm `require("socket")`/`require("lunajson")` still resolve and the bridge still connects) since there's no automated way to verify Lua changes — I'll drive this myself via terminal, the same way as the Task 1 spike.
 - [x] **5. Remove the unused `Parquet.Net` package reference** from `PokemonRedRL.Utils`, `PokemonRedRL.Core`, and `PokemonRedRL.Agent` `.csproj` files (confirmed via grep: only `PokemonRedRL.Models/Experience/ModelExperience.cs` uses `[ParquetIgnore]`); keep it in `PokemonRedRL.Models`. Build each affected project after the change.
 - [x] **6. Update documentation.** `docs/PROJECT_OVERVIEW.md` §6: remove the badge/level-bug and duplicate-DI-registration items from the known-gaps list (now fixed); keep the `ExperienceReplay`/`MemoryCache`/`SumTree`-unused note (not resolved, per user decision to keep them). Run `/cartograph` to refresh `docs/CODEBASE_MAP.md` (file removed, package refs changed).
-- [x] **7. Update the roadmap.** In `docs/tasks/roadmap-vision-and-rl-overhaul.md`: tick Task 2 as resolved (narrowed scope only), and insert a new **Task 2b — Multi-instance launch automation & fast-forward wiring** entry (not planned in detail here — that's its own future `/plan-task`) carrying forward the `launch_agents.bat`/fast-forward items split out of this task.
+- [x] **7. Update the roadmap.** In `docs/stories/roadmap-vision-and-rl-overhaul.md`: tick Task 2 as resolved (narrowed scope only), and insert a new **Task 2b — Multi-instance launch automation & fast-forward wiring** entry (not planned in detail here — that's its own future `/plan-task`) carrying forward the `launch_agents.bat`/fast-forward items split out of this task.
 
 ## Risks & irreversible actions
 
@@ -92,7 +93,7 @@ Full solution build: **0 errors, 0 warnings**. Manual mGBA smoke test for the Lu
 **Documentation**
 - `docs/PROJECT_OVERVIEW.md`: §4's "two diverged copies" subsection replaced with a note that there's now a single authoritative script; §6's known-gaps list updated — removed the now-fixed reward-bug, duplicate-DI, diverged-script, and hardcoded-path items; kept the `ExperienceReplay`/`MemoryCache`/`SumTree`-unused note (per user decision) plus the two other pre-existing items (per-call `Random()`, no protocol contract test); fixed a stale `§6.1` cross-reference in §7.
 - `docs/CODEBASE_MAP.md`: updated the tree diagram and emulator-bridge-assets table to reflect the single remaining Lua script and the path-resolution fix.
-- `docs/tasks/roadmap-vision-and-rl-overhaul.md`: Task 2 marked resolved with a summary of what actually landed.
+- `docs/stories/roadmap-vision-and-rl-overhaul.md`: Task 2 marked resolved with a summary of what actually landed.
 
 **Not part of this task, explicitly deferred to Task 2b:** `launch_agents.bat`'s broken `--port`/`--script` invocation, and programmatic fast-forward control — both confirmed still unsolved.
 

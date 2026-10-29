@@ -45,6 +45,10 @@ This project implements a Reinforcement Learning (RL) agent that learns to play 
 |--------------------|------------------------|
 | Emulator           | mGBA 0.10.5            |
 | Bridge             | Lua 5.4.7 + luasocket  |
-| Core Application   | .NET 8.0               |
+| Core Application   | .NET 10.0              |
 | Machine Learning   | TorchSharp             |
 | Protocol           | Custom TCP             |
+
+## Development Workflow
+
+The repository's GitHub Copilot BMAD workflow starts at `/start-flow`. See [docs/BMAD-WORKFLOW.md](docs/BMAD-WORKFLOW.md) for the route from idea to reviewed commit and the commands available in this repository.

@@ -1,5 +1,10 @@
-# Brainstorm: Full Project Architecture Review
+# BR-0002 — Brainstorm: Full Project Architecture Review
 
+**ID:** BR-0002
+**Status:** Archived
+**Disposition:** Incorporated
+**Incorporated into:** [I1 Initiative](../../../docs/initiatives/I1-computer-vision-rl-overhaul.md), [E1 Vision](../../../docs/epics/E1-vision-perception.md), [E2 RL](../../../docs/epics/E2-rl-training-and-models.md), [E3 Emulator](../../../docs/epics/E3-emulator-integration-runtime.md), [E4 Reliability](../../../docs/epics/E4-reliability-validation.md), [ADR-0001](../../../docs/adr/ADR-0001-vision-representation.md), [ADR-0002](../../../docs/adr/ADR-0002-rl-algorithm-review.md)
+**Archived:** 2026-10-30
 **Date:** 2026-10-11
 **Stance:** Ideate for Me (Mary 📊 — independent analysis)
 **Participants:** AI (Mary — Analyst persona)

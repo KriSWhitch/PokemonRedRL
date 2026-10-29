@@ -1,8 +1,9 @@
-# Task 3 — .NET & package modernization
+# S4 — .NET & package modernization
+**ID:** S4 (legacy ID: T3)
 
 Status: Done
 
-Roadmap source: [roadmap-vision-and-rl-overhaul.md](roadmap-vision-and-rl-overhaul.md), Task 3.
+Roadmap source: [roadmap-vision-and-rl-overhaul.md](../roadmap-vision-and-rl-overhaul.md), Task 3.
 
 ## Goal
 
@@ -12,7 +13,7 @@ Move the whole solution from **.NET 8 to .NET 10 (current LTS)** and bring every
 
 - **OpenCvSharp4 + OpenCvSharp4.runtime.win: ADD now** (latest 4.13.0.20260627), even though Task 1 chose PrintWindow and the OpenCV-vs-TorchSharp preprocessing decision is deferred to Task 4/6 — user prefers having the fuller-function toolkit available; it can be removed later if unused.
 - **Parquet.Net 5.1.1: REMOVE** from `PokemonRedRL.Models` (completes Task 2's trim — it was left only there, used solely for two `[ParquetIgnore]` attributes; no Parquet I/O exists anywhere).
-- **System.Net.Sockets 4.3.0 shim: REMOVE** from `PokemonRedRL.Core` (flagged in `pre-overhaul-cleanup.md` as unnecessary on modern TFMs; `System.Net.Sockets` is in-box since .NET Core).
+- **System.Net.Sockets 4.3.0 shim: REMOVE** from `PokemonRedRL.Core` (flagged in `S2-pre-overhaul-cleanup.md` as unnecessary on modern TFMs; `System.Net.Sockets` is in-box since .NET Core).
 
 ## Researched facts (versions verified at planning time — re-verify latest at implementation)
 

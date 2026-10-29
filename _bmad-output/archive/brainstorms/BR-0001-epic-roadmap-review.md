@@ -1,5 +1,10 @@
-# Brainstorm: Epic Roadmap Quality & Feasibility Review
+# BR-0001 — Brainstorm: Epic Roadmap Quality & Feasibility Review
 
+**ID:** BR-0001
+**Status:** Archived
+**Disposition:** Incorporated
+**Incorporated into:** [I1 Initiative](../../../docs/initiatives/I1-computer-vision-rl-overhaul.md), [E1 Vision](../../../docs/epics/E1-vision-perception.md), [E2 RL](../../../docs/epics/E2-rl-training-and-models.md), [E4 Reliability](../../../docs/epics/E4-reliability-validation.md), [ADR-0001](../../../docs/adr/ADR-0001-vision-representation.md)
+**Archived:** 2026-10-30
 **Date:** 2026-10-11
 **Stance:** Ideate for Me (Mary 📊 reviews existing epic independently)
 **Participants:** AI (Mary — Analyst persona)

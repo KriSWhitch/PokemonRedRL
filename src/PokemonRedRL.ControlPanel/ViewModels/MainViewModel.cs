@@ -8,7 +8,7 @@ namespace PokemonRedRL.ControlPanel.ViewModels;
 
 /// <summary>
 /// Top-level view model for the control-panel session dashboard + emulator wall (see frozen UX
-/// contract in docs/tasks/automated-mgba-launch-and-fast-forward.md). Owns session settings, the
+/// contract in docs/stories/archive/S3-controlpanel-mvp.md). Owns session settings, the
 /// paginated tile grid, and the preview/ping timers.
 /// </summary>
 public class MainViewModel : ViewModelBase, IDisposable

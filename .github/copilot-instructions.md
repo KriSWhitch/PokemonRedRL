@@ -4,14 +4,14 @@ These are repository-wide custom instructions for GitHub Copilot / AI coding age
 
 ## What this project is
 
-PokemonRedRL trains a Reinforcement Learning (DQN) agent to play **Pokémon Red** through the **mGBA** emulator. A Lua script running inside mGBA exposes game memory over a TCP socket; a .NET 8 application reads game state, decides actions, executes them back through the socket, and trains a neural network (TorchSharp) from the resulting experience, persisted in Redis.
+PokemonRedRL trains a Reinforcement Learning (DQN) agent to play **Pokémon Red** through the **mGBA** emulator. A Lua script running inside mGBA exposes game memory over a TCP socket; a .NET 10 application reads game state, decides actions, executes them back through the socket, and trains a neural network (TorchSharp) from the resulting experience, persisted in Redis.
 
 ```mermaid
 flowchart LR
     subgraph mGBA["mGBA emulator"]
         Lua["mgba_socket.lua / pokemon.lua\n(reads emulator RAM, exposes TCP server)"]
     end
-    subgraph NET[".NET 8 process (PokemonRedRL.Agent)"]
+    subgraph NET[".NET 10 process (PokemonRedRL.Agent)"]
         CM["ConnectionManager + SocketProtocol\n(PokemonRedRL.Core.Emulator)"]
         MGC["MGBAEmulatorClient\n(IEmulatorClient)"]
         EA["ExplorationAgent\n(runs episodes, epsilon-greedy)"]
@@ -55,11 +55,13 @@ A full, generated file-by-file map lives in [docs/CODEBASE_MAP.md](../docs/CODEB
 
 A narrative "what/why" companion doc — motivation, RL approach, design tradeoffs, and known gaps/inconsistencies — lives in [docs/PROJECT_OVERVIEW.md](../docs/PROJECT_OVERVIEW.md). Read it before making non-trivial changes; update it if you discover a new design-level inconsistency or resolve a listed one.
 
-The **single source of truth** for project state is [docs/PROJECT_SPEC.md](../docs/PROJECT_SPEC.md). It consolidates all completed tasks, the active epic with subtask status, key decisions, open risks, and artifact links. **Read it first** when starting any task. **Update it** at the checkpoints defined in each BMAD prompt (plan → add task, review → update status, commit → mark done, retro → add lessons). Never hand-edit status fields — let the prompts do it.
+The **single source of truth for work status, hierarchy, dependencies, branch state, and next actions** is [docs/WORK_ITEMS.md](../docs/WORK_ITEMS.md). **Read it first** when starting or resuming work; update it only at the checkpoints defined by the owning workflow prompt. [docs/PROJECT_SPEC.md](../docs/PROJECT_SPEC.md) is the source for project context, architecture decisions, and risks; do not duplicate its narrative into the work registry or duplicate registry status tables here. Never hand-edit status fields outside the workflow prompts.
 
-Each non-trivial task gets a committed plan file at `docs/tasks/<slug>.md` (created by `/bmad-plan`, updated through `/bmad-review` → `/bmad-build` → `/bmad-commit`, tracking a `Status:` field and a step checklist). These are kept in the repo as a durable record of what was planned and done — do not delete or gitignore `docs/tasks/`.
+Work is organized as **Initiative → Epic → User Story/Bug**. IDs are project-global (`I<n>`, `E<n>`, `S<n>`), sequential, never reused or renumbered, and allocated from `_bmad/config.toml [ids]` plus [docs/WORK_ITEMS.md](../docs/WORK_ITEMS.md). Canonical records use `<ID>-<slug>.md`; the registry includes migration aliases for legacy T-numbers and is authoritative for parent/child assignment. Initiative records live in `docs/initiatives/`, Epic records in `docs/epics/`, and detailed Story/Bug plans in `docs/stories/`; Epic records contain story intent and acceptance detail. A story belongs to one Epic unless explicitly standalone.
 
-**Task archiving:** When a task reaches `✅ Done` (via `/bmad-commit`), its file is moved to `docs/tasks/archive/<slug>.md`. Only the active epic roadmap and in-progress/planned tasks stay in `docs/tasks/`. The epic roadmap itself is archived only when the entire epic is `Completed`. This keeps the working directory clean — `docs/tasks/` always contains exactly what's being worked on right now.
+Each new work flow has its own ID-bearing branch: `initiative/i<n>-<slug>` from the configured base, `epic/e<n>-<slug>` from its Initiative branch, `story/s<n>-<slug>` or `bug/s<n>-<slug>` from its Epic branch (or the configured base when standalone). `_bmad/config.toml` is the source of ID prefixes, branch prefixes, and default base; this repository uses `development` as its default base. BMAD merges Initiative roots and standalone work back into `development`; it never promotes to `main`, which the user merges manually when ready. `/start-flow` creates or resumes the branch; it must not stash, commit, push, or merge without explicit user approval.
+
+**Archiving and merging:** `/bmad-archive` moves a completed Story plan to `docs/stories/archive/`, or an eligible Epic/Initiative record to its level's `archive/` folder; it can also archive a dispositioned brainstorm under `_bmad-output/archive/brainstorms/`. It does not commit. ADRs are not moved when superseded; update status and successor links in place. `/bmad-commit` commits reviewed implementation and prepared work-record archive changes together. `/bmad-merge` only merges that committed archived branch into its immediate parent. Each command has one responsibility and its own approval gate.
 
 ## Conventions actually used in this codebase
 
@@ -108,40 +110,65 @@ Environment variables for the Agent container:
 - Run with custom mGBA host: `dotnet run --project src/PokemonRedRL.Agent -- --host 127.0.0.1 --port 12345`
 - There is currently no CI workflow in `.github/` — builds/tests are run locally.
 
+## Project Context Sources
+
+Generic Copilot agents must load project-specific facts from this section and the referenced documents; do not copy this project's stack, paths, risks, metrics, or status into reusable persona files. When reusing the agent files in another repository, adapt this section and the repository's instructions only.
+
+`_bmad/config.toml [paths]` is the authoritative document/path map. It covers repository instructions, agents/prompts, project state and overview, codebase/workflow maps, ADRs, Initiative/Epic/Story records and archives, solution entry point, and brainstorm/spec/retrospective/UX artifacts. `[ids]` defines separate stable sequences for work items, ADRs, and brainstorms; `docs/PROJECT_SPEC.md` is the registry for allocated IDs and artifact status. Resolve exact paths and ID policy there rather than duplicating them in reusable agents or prompts. Repository rules, stack, build/test commands, and verified engineering constraints live in this file. When reusing the agents or prompts in another repository, adapt the repo instructions and `[paths]`/`[ids]` map rather than editing role or workflow logic.
+
+Agents should read only the mapped sources relevant to the request. The configured project-state file is the status source of truth; source code remains authoritative for implementation behavior.
+
 ## Agentic workflow for this repo (BMAD-adapted)
 
-This project uses a **BMAD-adapted workflow** (Breakthrough Method for Agile Ai Driven Development). The workflow has four phases:
+This project uses a **BMAD-adapted workflow** (Breakthrough Method for Agile Ai Driven Development) through GitHub Copilot's native prompts and agents. Start or resume work with `/start-flow`; the concise end-to-end guide is [docs/BMAD-WORKFLOW.md](../docs/BMAD-WORKFLOW.md). No ForgeAI runtime, `vsdlc`, MCP server, tracker integration, or external BMAD package is required.
+
+The workflow has these phases:
 
 ```mermaid
 flowchart LR
-    C["🎯 Clarify<br/>bmad-brainstorm"] --> P["📋 Plan<br/>bmad-plan"]
-    P --> B["🔨 Build<br/>bmad-build"]
+    S["Start / Resume<br/>start-flow"] --> D["Decompose<br/>bmad-decompose"]
+    D -->|"Initiative / Epic children"| S
+    S -->|"Quick Story / Bug"| B["🔨 Build<br/>bmad-build"]
+    S -->|"Full Story"| P["📋 Plan<br/>bmad-plan"]
+    P --> A["Architecture<br/>bmad-architecture"]
+    A --> B
     B --> R["✅ Review<br/>bmad-review"]
-    R --> M["💾 Commit<br/>bmad-commit"]
-    M --> L["🔄 Learn<br/>bmad-retrospective"]
-    L --> P
+    R --> AR["Archive record<br/>bmad-archive"]
+    AR --> M["💾 Commit<br/>bmad-commit"]
+    M --> G["Merge upward<br/>bmad-merge"]
+    G --> L["🔄 Learn (optional)<br/>bmad-retrospective"]
 ```
 
 ### Quick Reference
 
 | Phase | Prompt | Agent Persona | Output |
 |---|---|---|---|
-| Brainstorm | `/bmad-brainstorm` | Mary (Analyst) | `_bmad-output/brainstorm-<topic>.md` |
-| Plan | `/bmad-plan` | John (PM) / Winston (Architect) | `docs/tasks/<slug>.md` or `_bmad-output/spec-<slug>/` |
+| Start / Resume | `/start-flow` | Routes to the next phase | Existing plan or next BMAD phase |
+| Help / Status | `/bmad-help` | Reads PROJECT_SPEC, branch, and active artifacts | Current phase and one next action |
+| Decompose | `/bmad-decompose` | Analyst / PM | Initiative → Epics or Epic → User Stories |
+| Brainstorm (optional) | `/bmad-brainstorm` | Mary (Analyst) | `_bmad-output/brainstorm-<topic>.md` for unclear ideas only |
+| Plan | `/bmad-plan` | John (PM) / Winston (Architect) | `docs/stories/<slug>.md` or `_bmad-output/spec-<slug>/` |
+| Correct Course | `/bmad-correct-course` | John (PM) / Winston (Architect) | Impact analysis and approved plan revision |
+| Test Design (optional) | `/bmad-test-design` | Quinn (QA) | Risk-based verification strategy in the plan |
+| UX Design (optional) | `/bmad-ux` | Sally (UX Designer) | Approved WPF interaction contract for material UI changes |
 | Build | `/bmad-build` | Amelia (Developer) | Code changes |
-| Review | `/bmad-review` | — | Review report |
-| Commit | `/bmad-commit` | — | Git commit |
-| Code Review | `/bmad-code-review` | — | Code review report |
+| Acceptance Review | `/bmad-review` | Quinn (QA) | Required plan/verification acceptance gate |
+| Archive | `/bmad-archive` | — | Move a completed Story/Epic/Initiative record; do not commit |
+| Commit | `/bmad-commit` | Pat (Product Owner) | Commit reviewed implementation plus archive changes |
+| Merge | `/bmad-merge` | — | Merge the archived branch into its immediate parent |
+| Code Review (optional) | `/bmad-code-review` | Quinn (QA) | Additional correctness/performance/security/testability audit |
 | Architecture | `/bmad-architecture` | Winston (Architect) | `docs/adr/<date>-<slug>.md` |
 | Retrospective | `/bmad-retrospective` | — | `_bmad-output/retro-<slug>.md` |
+
+`/bmad-review` is the required plan-acceptance gate. `/bmad-code-review` is an optional additional source-level audit for correctness, performance, security, and testability; it does not replace or automatically repeat the required review.
 
 ### Planning Depths
 
 | Depth | When | Prompts |
 |---|---|---|
-| **Light** | Bug fix, config change | `/bmad-plan` → `/bmad-build` → `/bmad-review` → `/bmad-commit` |
-| **Standard** | Feature, refactor | `/bmad-plan` → `/bmad-architecture` (optional) → `/bmad-build` → `/bmad-review` → `/bmad-commit` |
-| **Full** | Major feature, architecture change | `/bmad-brainstorm` → `/bmad-plan` → `/bmad-architecture` → `/bmad-build` → `/bmad-review` → `/bmad-commit` → `/bmad-retrospective` |
+| **Quick Flow** | Well-understood User Story; Bugs always use Quick | `/bmad-build` (spec + approval; optional `/bmad-ux` for unclear UI and `/bmad-test-design` for high-risk verification) → `/bmad-review` → `/bmad-archive` → `/bmad-commit` → `/bmad-merge` |
+| **Full Flow** | User Story with requirements/architecture to settle first | `/bmad-plan` → optional `/bmad-ux` for unclear UI → `/bmad-architecture` → optional `/bmad-test-design` for high risk → `/bmad-build` → `/bmad-review` → `/bmad-archive` → `/bmad-commit` → `/bmad-merge` |
+| **Initiative/Epic** | Strategic scope or parent-level decomposition | `/bmad-decompose`; child Epics/Stories each start their own branch with `/start-flow` |
 
 ### Agent Personas
 
@@ -190,4 +217,4 @@ Full-depth plans (`_bmad-output/spec-<slug>/`) include a `.memlog.md` — an app
 7. **Self-validate plans** against Spec Law before presenting
 8. **Evidence-based retrospectives** — every finding links to a commit, file, or event
 9. **Keep `docs/PROJECT_SPEC.md` in sync** — every BMAD phase updates it at its checkpoint (see each prompt's "Update PROJECT_SPEC.md" step). Task statuses use these exact values: `✅ Done`, `🔄 In Progress`, `🔜 Next`, `⬜ Planned`, `⏸️ Blocked`, `❌ Cancelled`. Never reuse or renumber task IDs.
-10. **Read `docs/PROJECT_SPEC.md` first** — before any task, check the active epic, completed tasks, and open risks to avoid duplicating work or repeating known mistakes.
+10. **Read `docs/PROJECT_SPEC.md` first** — before any task, check the active Initiative, child Epics/Stories, completed work, and open risks to avoid duplicating work or repeating known mistakes.
