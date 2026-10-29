@@ -1,0 +1,131 @@
+.github/agents/amelia-dev.md
+  s_e18a3fb7d07f93::t_cdc35176975db4 1-5,10,14,18,23-29,37-42,51,56-58
+.github/agents/john-pm.md
+  s_e18a3fb7d07f93::t_60adafcb0a6bf8 1-5,10,14,22-25,27,35,38,49-50,54-56
+.github/agents/mary-analyst.md
+  s_e18a3fb7d07f93::t_21c20e4e4fa78e 1-5,10,14,22-24,35,37,41,50-52,54,56,60-62
+.github/agents/pat-po.md
+  s_e18a3fb7d07f93::t_38a5014660c867 1-5,10,14,22,27,35,38,40,56-58
+.github/agents/quinn-qa.md
+  s_e18a3fb7d07f93::t_f9e60279c443a3 1-5,10,14,22,25-26,35,38-39,49,56,58,60-64,66,68-70
+.github/agents/sally-ux.md
+  s_e18a3fb7d07f93::t_de133cb4da8536 1-5,10,14,18,22,25-28,32,36-37,39,41,49-51,55-56
+.github/agents/winston-architect.md
+  s_e18a3fb7d07f93::t_a221dbc2ce956d 1-5,10,14,23,27-28,36,41-43,57-59
+.github/copilot-instructions.md
+  s_e18a3fb7d07f93::t_9e7a9b75a380b5 7,14,58,60,62-64,113-120,123-125,129-134,136-139,146-153,155-159,163-164,169-171,220
+.github/prompts/bmad-architecture.prompt.md
+  s_e18a3fb7d07f93::t_63609808888536 2,5,7,9,11-14,16,18,20-21,23,25-29,31,33,35,37,39,41-45,47,49
+.github/prompts/bmad-archive.prompt.md
+  s_e18a3fb7d07f93::t_37fdbd629a83e2 1-63
+.github/prompts/bmad-brainstorm.prompt.md
+  s_e18a3fb7d07f93::t_88cad65af8b8a8 2,9-23,37-43,52,58,72,79,94,110,114-116,164,166,174
+.github/prompts/bmad-build.prompt.md
+  s_e18a3fb7d07f93::t_92bd17b561d2cb 2,5,7,9,11,13,15-32,34-68
+.github/prompts/bmad-code-review.prompt.md
+  s_e18a3fb7d07f93::t_50c1ad03dae50d 2,5,7,9,11,13-15,19,21-23,25,27-29,31,33-34,36,38-39,43-46,48,50,52,54-57,59,61-63,65
+.github/prompts/bmad-commit.prompt.md
+  s_e18a3fb7d07f93::t_a27d76254606b0 2,5,7,9,11-15,17,19-22,24,26-30,32,34,36
+.github/prompts/bmad-correct-course.prompt.md
+  s_e18a3fb7d07f93::t_83803ffef4b9d1 1-38
+.github/prompts/bmad-decompose.prompt.md
+  s_e18a3fb7d07f93::t_f460a343f38239 2,5,7,9,11,13-17,19,21-26,28,30-34,36-42
+.github/prompts/bmad-help.prompt.md
+  s_e18a3fb7d07f93::t_a4a184f253bd1a 1-27
+.github/prompts/bmad-merge.prompt.md
+  s_e18a3fb7d07f93::t_6455eefb018f22 1-46
+.github/prompts/bmad-plan.prompt.md
+  s_e18a3fb7d07f93::t_2984d9e28a50fb 2,9,11-13,17-19,24-26,29,34,42-43,48,56,64-65,71,73-77,88,104,106-110,146,152-154,162-164,172,175-176,183,235,238-241,248,250,254,259,263-264,301-302,304
+.github/prompts/bmad-retrospective.prompt.md
+  s_e18a3fb7d07f93::t_d6be96450b84f5 2,5,7,9,11-13,15,17-55
+.github/prompts/bmad-review.prompt.md
+  s_e18a3fb7d07f93::t_8a38f9ad4c2b29 2,5,7,9,11-13,15,17,19,21-24,26,28-30,32,34-36,38,40-42,44,46-48,50,52-54,56,58,60,62-65,67,69-71,73,75,77-81
+.github/prompts/bmad-test-design.prompt.md
+  s_e18a3fb7d07f93::t_81ca51483f9b27 1-47
+.github/prompts/bmad-ux.prompt.md
+  s_e18a3fb7d07f93::t_3492c5e432f4ee 1-49
+.github/prompts/cartograph.prompt.md
+  s_e18a3fb7d07f93::t_a165ff40d1823b 3,8,12-17,21,23-24,29,33
+.github/prompts/start-flow.prompt.md
+  s_e18a3fb7d07f93::t_645d793e60a193 1-76
+README.md
+  s_e18a3fb7d07f93::t_61207c6e669f12 48,51-54
+_bmad-output/archive/brainstorms/BR-0001-epic-roadmap-review.md
+  s_e18a3fb7d07f93::t_f7efdb1cdaad3d 1,3-7
+_bmad-output/archive/brainstorms/BR-0002-full-architecture-review.md
+  s_e18a3fb7d07f93::t_175ed895f3f9d3 1,3-7
+_bmad/config.toml
+  s_e18a3fb7d07f93::t_1722b425e2f240 8,12,14-23,33-35,37-44,46-62
+docs/BMAD-MIGRATION.md
+  s_e18a3fb7d07f93::t_493ce6e1d23ecc 3-10,31,33,57-64,93,112-113,116,118,122,124,126,128,130
+docs/BMAD-WORKFLOW.md
+  s_e18a3fb7d07f93::t_863cf21920ab84 1-121
+docs/CODEBASE_MAP.md
+  s_e18a3fb7d07f93::t_24b1daa5774212 5,84-85,88-89,91-94,96-98,150,199-200,204-215,217-230
+docs/PROJECT_OVERVIEW.md
+  s_e18a3fb7d07f93::t_0686442d4c6ec1 45,59,63,67,72,74,93-94
+docs/PROJECT_SPEC.md
+  s_e18a3fb7d07f93::t_78889394be3354 3-4,6,14-39,68,70,76-87,93-97,110-126,130,140-142,149-161,163-165,168-169,171,173,176-214
+docs/WORK_ITEMS.md
+  s_e18a3fb7d07f93::t_d06e1edc0a60e4 1-83
+docs/adr/ADR-0001-vision-representation.md
+  s_e18a3fb7d07f93::t_f5faff637bdc2a 1,3,13,15,19,21-23,35,139,152,163,175,180,184,277-278,280,286,293,299-301
+docs/adr/ADR-0002-rl-algorithm-review.md
+  s_e18a3fb7d07f93::t_20c643a559b314 1,3,11,22,42,83,100,102,114,132,143,153,155,194,205,226
+docs/epics/E1-vision-perception.md
+  s_e18a3fb7d07f93::t_edf7306fb8e8d7 1-28
+docs/epics/E2-rl-training-and-models.md
+  s_e18a3fb7d07f93::t_b3f4c2606dfaed 1-31
+docs/epics/E3-emulator-integration-runtime.md
+  s_e18a3fb7d07f93::t_62e228751d7f11 1-34
+docs/epics/E4-reliability-validation.md
+  s_e18a3fb7d07f93::t_980d8d9fb5a1ab 1-30
+docs/initiatives/I1-computer-vision-rl-overhaul.md
+  s_e18a3fb7d07f93::t_9179f1763da68e 1-82
+docs/stories/archive/S0-repo-refactor-project-overview.md
+  s_e18a3fb7d07f93::t_90b2bf2c3362ae 1-2,66
+docs/stories/archive/S1-frame-capture-spike.md
+  s_e18a3fb7d07f93::t_3e97a57885934f 1-2,6,21,53,119,121
+docs/stories/archive/S2-pre-overhaul-cleanup.md
+  s_e18a3fb7d07f93::t_db458d79e9b2c4 1-2,6,21,31,96
+docs/stories/archive/S21-copilot-bmad-workflow.md
+  s_e18a3fb7d07f93::t_5af884fac0a9bd 1-85
+docs/stories/archive/S3-controlpanel-mvp.md
+  s_e18a3fb7d07f93::t_31352307244772 1-2,6,54,88,145
+docs/stories/archive/S4-net-package-modernization.md
+  s_e18a3fb7d07f93::t_fb65df9c6cd907 1-2,6,16
+docs/stories/archive/S5-docker-containerization.md
+  s_e18a3fb7d07f93::t_df3d7a055f6b5a 1-2,6
+docs/stories/archive/S6-remove-opencv-adopt-torchvision.md
+  s_e18a3fb7d07f93::t_03fcc4568c1d88 1-2
+docs/stories/archive/S7-design-vision-representation.md
+  s_e18a3fb7d07f93::t_3be3ae1cd67a2d 1-2,51,118,138
+docs/stories/archive/S8-rl-algorithm-review.md
+  s_e18a3fb7d07f93::t_052d9f350217aa 1-2,49,118,139
+docs/stories/roadmap-vision-and-rl-overhaul.md
+  s_e18a3fb7d07f93::t_3fbc15d0a700a9 1-5
+src/PokemonRedRL.ControlPanel/Models/Enums.cs
+  s_e18a3fb7d07f93::t_a1718253711fd8 10
+src/PokemonRedRL.ControlPanel/Models/RunManifest.cs
+  s_e18a3fb7d07f93::t_6ccb4009d85b88 6
+src/PokemonRedRL.ControlPanel/Services/PreviewCaptureService.cs
+  s_e18a3fb7d07f93::t_343a3e169f2d6c 12
+src/PokemonRedRL.ControlPanel/ViewModels/MainViewModel.cs
+  s_e18a3fb7d07f93::t_091c6c07d32b2b 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "713053305f94620223f68353ade36a1a9040c4dc",
+  "prompts": {},
+  "sessions": {
+    "s_e18a3fb7d07f93": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "6e32ade6-cd95-42cc-9dc7-789e94f84c04",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    }
+  }
+}
