@@ -119,7 +119,7 @@ Each BMAD prompt updates this file at specific checkpoints:
 | `/bmad-code-review` | Optional standalone source review; no project status update |
 | `/bmad-archive` | Moves the completed work record and updates its canonical path; completion status waits for `/bmad-commit` |
 | `/bmad-commit` | Commits reviewed implementation and prepared archive changes; marks Story `Done` in WORK_ITEMS |
-| `/bmad-merge` | Merges one parent level and records integration/branch state in WORK_ITEMS |
+| `/bmad-merge` | Merges one parent level, records integration state in the merge commit, then asks before pushing and verifies the parent remote ref |
 | `/bmad-retrospective` | Writes an evidence-based report; applies approved lessons to project context |
 | `/bmad-architecture` | Registers ADR ID in WORK_ITEMS; updates the decision and artifact links here |
 | `/bmad-brainstorm` | Reserves BR ID in WORK_ITEMS; maintains brainstorm lifecycle and citations here |

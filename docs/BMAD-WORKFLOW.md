@@ -56,7 +56,7 @@ The deciding question for Quick vs Full is whether requirements or architecture 
 7. **Review.** `/bmad-review` is the required acceptance gate against the plan, verification evidence, integration contracts, and project records. It traces each behavior-changing acceptance signal to an observable result; a passing build alone is insufficient. `/bmad-code-review` is an optional additional correctness/performance/security/testability audit; it does not replace the required review.
 8. **Archive.** After review, `/bmad-archive` moves the Story plan or eligible parent record and prepares status/link updates. It does not stage or commit. Before closing an Epic/Initiative, verify parent-level acceptance and integration evidence; child merges alone do not prove the combined outcome. An Epic retrospective is recommended, but remains optional.
 9. **Commit and publish.** `/bmad-commit` commits the reviewed implementation together with prepared archive/status changes, then asks separately before pushing the child branch. A successful push publishes the reviewed commit before merge; a declined or failed push blocks `/bmad-merge`.
-10. **Merge upward.** `/bmad-merge` verifies the remote child ref matches the reviewed commit, asks for approval, and merges exactly one level: Story → Epic → Initiative → base branch. It detects an already-integrated child as a no-op and recommends the next child flow or parent closure without starting it automatically.
+10. **Merge and publish upward.** `/bmad-merge` verifies the remote child ref matches the reviewed commit, asks before merging exactly one level: Story → Epic → Initiative → base branch, records integration state in that merge commit, then asks separately before pushing the updated parent branch. If approved, it performs the push and verifies remote parity. It never pushes `main` as part of the development workflow.
 11. **Learn (optional).** Use `/bmad-retrospective` after a meaningful cycle and apply accepted lessons to the project docs or prompts.
 
 If requirements or architecture change materially after approval, pause implementation, update the plan with the user, and then continue against the revised plan. Do not silently change the contract mid-build.
@@ -68,7 +68,7 @@ If requirements or architecture change materially after approval, pause implemen
 - Review findings are resolved, explicitly deferred, or accepted by the user; a clean build alone is not a review.
 - The exact staged changes and commit message are shown before committing.
 - Branch creation is authorized by starting a flow after the parent and route are clear; dirty worktrees require an explicit decision and are never stashed automatically.
-- Archive edits, commits, local merges, and pushes each require explicit approval. Push the child branch before merge so its reviewed commit exists remotely; the merge command verifies the remote ref. Pushes do not replace the required parent-level local merge, and `main` remains a separate manual promotion.
+- Archive edits and commits require explicit approval. Push the child branch before merge so its reviewed commit exists remotely; the merge command verifies the remote ref. Merge and the subsequent parent-branch push have separate approval gates; after approval, `/bmad-merge` performs and verifies the push. `main` remains a separate manual promotion.
 
 ## Records and Statuses
 
