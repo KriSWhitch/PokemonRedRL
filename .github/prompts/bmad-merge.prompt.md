@@ -14,7 +14,8 @@ Merge the current completed branch into exactly one immediate parent branch. Thi
    - Story/Bug: its plan is under `[paths].story_archive_dir`.
    - Epic: its record is under `[paths].epic_archive_dir`.
    - Initiative: its record is under `[paths].initiative_archive_dir`.
-4. If any precondition fails, explain the blocker and stop without switching branches or merging.
+4. Require the exact child branch and commit to be published to `[git].remote_name`; the fetched remote child ref must point at the local child HEAD. If it is absent or behind, stop and route to `/bmad-commit` to publish it. Never force-push.
+5. If any precondition fails, explain the blocker and stop without switching branches or merging.
 
 ## Resolve the Immediate Parent
 
@@ -26,9 +27,9 @@ Merge the current completed branch into exactly one immediate parent branch. Thi
 
 ## Validate and Approve
 
-1. Fetch remote refs when available. Resolve the parent from the work record, not from a guessed slug. Verify the child's stable ID matches its archive filename and branch; for child work also verify the parent's child list, while standalone work must match its standalone WORK_ITEMS row. Stop on mismatch.
+1. Fetch remote refs. Resolve the parent from the work record, not from a guessed slug. Verify the child's stable ID matches its archive filename and branch; for child work also verify the parent's child list, while standalone work must match its standalone WORK_ITEMS row. Verify the fetched remote child ref equals the local child HEAD. Stop on mismatch.
 2. Confirm the parent branch exists locally; if it exists only on `[git].remote_name`, create a local tracking branch without changing its history. If the local parent is behind or diverged from its remote, stop and ask the user to synchronize it.
-3. Show the child branch, immediate parent branch, commit containing its archive changes, and merge command. Ask for explicit approval before switching branches or merging.
+3. Show the published child branch, immediate parent branch, commit containing its archive changes, and merge command. Ask for explicit approval before switching branches or merging.
 
 ## Merge
 
@@ -36,7 +37,7 @@ After approval:
 
 1. Recheck that the worktree is clean and the commit containing both implementation and archive changes is still present.
 2. Switch to the parent branch and verify it is clean.
-3. Check whether the child branch is already an ancestor of the parent. If it is, report that the merge is already complete and do not create another merge commit. Otherwise merge only the child branch with `git merge --no-ff <child-branch>`.
+3. Reconfirm the fetched remote child ref still points at the reviewed local child HEAD. Check whether the child branch is already an ancestor of the parent. If it is, report that the merge is already complete and do not create another merge commit. Otherwise merge only the published child branch with `git merge --no-ff <child-branch>`.
 4. If conflicts occur, stop and preserve the conflict state; do not resolve by guessing.
 5. Run the focused verification commands required by the approved plan and repository instructions. Do not assume a language, solution path, or build tool.
 6. Report the resulting merge commit, or the already-integrated no-op. Ask separately before pushing. Never delete the child branch automatically.
