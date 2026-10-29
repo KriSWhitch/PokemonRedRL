@@ -1,0 +1,113 @@
+.github/prompts/bmad-architecture.prompt.md
+  s_e18a3fb7d07f93::t_29b4983df22c22 2,5,7,9,11-14,16,18,20-21,23,25-29,31,33,35,37,39,41-45,47,49
+.github/prompts/bmad-archive.prompt.md
+  s_e18a3fb7d07f93::t_e46e7883faf3a6 1-63
+.github/prompts/bmad-brainstorm.prompt.md
+  s_e18a3fb7d07f93::t_c97230565fff17 2,9-23,37-43,52,58,72,79,94,110,114-116,164,166,174
+.github/prompts/bmad-build.prompt.md
+  s_e18a3fb7d07f93::t_4d2a74d8d13140 2,5,7,9,11,13,15-32,34-68
+.github/prompts/bmad-code-review.prompt.md
+  s_e18a3fb7d07f93::t_038baf5ba8618c 2,5,7,9,11,13-15,19,21-23,25,27-29,31,33-34,36,38-39,43-46,48,50,52,54-57,59,61-63,65
+.github/prompts/bmad-commit.prompt.md
+  s_e18a3fb7d07f93::t_3d737f8c11906a 2,5,7,9,11-15,17,19-22,24,26-29,31
+.github/prompts/bmad-correct-course.prompt.md
+  s_e18a3fb7d07f93::t_d03d1b97f92c38 1-38
+.github/prompts/bmad-decompose.prompt.md
+  s_e18a3fb7d07f93::t_2d3568fed829c0 2,5,7,9,11,13-17,19,21-26,28,30-34,36-42
+.github/prompts/bmad-help.prompt.md
+  s_e18a3fb7d07f93::t_944fd79d43e460 1-27
+.github/prompts/bmad-merge.prompt.md
+  s_e18a3fb7d07f93::t_43fbab98faaf20 1-45
+.github/prompts/bmad-plan.prompt.md
+  s_e18a3fb7d07f93::t_177b809f1e8a45 2,9,11-13,17-19,24-26,29,34,42-43,48,56,64-65,71,73-77,88,104,106-110,146,152-154,162-164,172,175-176,183,235,238-241,248,250,254,259,263-264,301-302,304
+.github/prompts/bmad-retrospective.prompt.md
+  s_e18a3fb7d07f93::t_03b4893b12e210 2,5,7,9,11-13,15,17-55
+.github/prompts/bmad-review.prompt.md
+  s_e18a3fb7d07f93::t_561c2381b46bee 2,5,7,9,11-13,15,17,19,21-24,26,28-30,32,34-36,38,40-42,44,46-48,50,52-54,56,58,60,62-65,67,69-71,73,75,77-81
+.github/prompts/bmad-test-design.prompt.md
+  s_e18a3fb7d07f93::t_52c0f7ddb217d5 1-47
+.github/prompts/bmad-ux.prompt.md
+  s_e18a3fb7d07f93::t_501207d41089a6 1-49
+.github/prompts/cartograph.prompt.md
+  s_e18a3fb7d07f93::t_9a2b73ffe63838 3,8,12-17,21,23-24,29,33
+.github/prompts/start-flow.prompt.md
+  s_e18a3fb7d07f93::t_9666108400f01b 1-76
+docs/BMAD-MIGRATION.md
+  s_e18a3fb7d07f93::t_4d0c22551ff19b 3-10,31,33,57-64,93,112-113,116,118,122,124,126,128,130
+docs/BMAD-WORKFLOW.md
+  s_e18a3fb7d07f93::t_9005af12fbfcbd 1-121
+docs/CODEBASE_MAP.md
+  s_e18a3fb7d07f93::t_0ae02df9aafbe4 5,84-85,88-89,91-94,96-98,150,199-200,204-215,217-230
+docs/PROJECT_OVERVIEW.md
+  s_f64b5f38c35d7d::t_72be6e182863a2 45,59,63,67,72,74,93-94
+docs/WORK_ITEMS.md
+  s_e18a3fb7d07f93::t_bd8892ad564dcd 1-83
+docs/adr/ADR-0001-vision-representation.md
+  s_e18a3fb7d07f93::t_377cbf6a23c2cd 1,3,13,15,19,21-23,35,139,152,163,175,180,184,277-278,280,286,293,299-301
+docs/adr/ADR-0002-rl-algorithm-review.md
+  s_e18a3fb7d07f93::t_0165ad7579e67b 1,3,11,22,42,83,100,102,114,132,143,153,155,194,205,226
+docs/epics/E1-vision-perception.md
+  s_e18a3fb7d07f93::t_3533b0ac1275f0 1-28
+docs/epics/E2-rl-training-and-models.md
+  s_e18a3fb7d07f93::t_bfebddd540d1ba 1-31
+docs/epics/E3-emulator-integration-runtime.md
+  s_e18a3fb7d07f93::t_21626074f9324c 1-34
+docs/epics/E4-reliability-validation.md
+  s_e18a3fb7d07f93::t_d3a9a89e96265c 1-30
+docs/initiatives/I1-computer-vision-rl-overhaul.md
+  s_e18a3fb7d07f93::t_37b170299f1507 1-82
+docs/stories/archive/S0-repo-refactor-project-overview.md
+  s_e18a3fb7d07f93::t_7426e35cc85df8 1-2,66
+docs/stories/archive/S1-frame-capture-spike.md
+  s_e18a3fb7d07f93::t_3f3f36ca709f73 1-2,6,21,53,119,121
+docs/stories/archive/S2-pre-overhaul-cleanup.md
+  s_e18a3fb7d07f93::t_7038cbf740c689 1-2,6,21,31,96
+docs/stories/archive/S21-copilot-bmad-workflow.md
+  s_e18a3fb7d07f93::t_54cf718dc0a334 1-85
+docs/stories/archive/S3-controlpanel-mvp.md
+  s_e18a3fb7d07f93::t_bd510f506867d9 1-2,6,54,88,145
+docs/stories/archive/S4-net-package-modernization.md
+  s_e18a3fb7d07f93::t_fcf72842975c90 1-2,6,16
+docs/stories/archive/S5-docker-containerization.md
+  s_e18a3fb7d07f93::t_397ebf76b75975 1-2,6
+docs/stories/archive/S6-remove-opencv-adopt-torchvision.md
+  s_e18a3fb7d07f93::t_4436b2aaad7c8c 1-2
+docs/stories/archive/S7-design-vision-representation.md
+  s_e18a3fb7d07f93::t_53217efa805762 1-2,51,118,138
+docs/stories/archive/S8-rl-algorithm-review.md
+  s_e18a3fb7d07f93::t_e188c56bbd1561 1-2,49,118,139
+docs/stories/roadmap-vision-and-rl-overhaul.md
+  s_e18a3fb7d07f93::t_6f4b555184d7e8 1-5
+src/PokemonRedRL.ControlPanel/Models/Enums.cs
+  s_f64b5f38c35d7d::t_41c1deb4badb20 10
+src/PokemonRedRL.ControlPanel/Models/RunManifest.cs
+  s_f64b5f38c35d7d::t_7e779447f21991 6
+src/PokemonRedRL.ControlPanel/Services/PreviewCaptureService.cs
+  s_f64b5f38c35d7d::t_7661e687953f58 12
+src/PokemonRedRL.ControlPanel/ViewModels/MainViewModel.cs
+  s_f64b5f38c35d7d::t_f2a2bb03697777 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "2ab34eca3e4a0444e403b4422d751a3025db43d0",
+  "prompts": {},
+  "sessions": {
+    "s_e18a3fb7d07f93": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "6e32ade6-cd95-42cc-9dc7-789e94f84c04",
+        "model": "unknown"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    },
+    "s_f64b5f38c35d7d": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "3b50430e-8ac6-478f-942c-22b9c3a90253",
+        "model": "unknown"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    }
+  }
+}
