@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -19,6 +20,23 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
+        using var configuration = AgentRuntimeConfiguration.Load(args);
+        try
+        {
+            if (AgentRuntimeConfiguration.IsDiagnostic(configuration))
+            {
+                Environment.ExitCode = await VisionDiagnostics.RunAsync(configuration);
+                return;
+            }
+        }
+        catch (Exception error) when (error is InvalidOperationException or ArgumentException or IOException or
+            System.Text.Json.JsonException or FormatException or PlatformNotSupportedException or KeyNotFoundException)
+        {
+            Console.Error.WriteLine($"Vision startup failed: {error.Message}");
+            Environment.ExitCode = 2;
+            return;
+        }
+
         // Single-agent mode: used by PokemonRedRL.ControlPanel, one process per emulator slot.
         // --port <n> binds directly to a known mGBA bridge port (skips NetworkConfigFactory scanning).
         // --host <ip> sets the mGBA host address (default 127.0.0.1; use host.docker.internal for containerized Agent).
@@ -29,6 +47,7 @@ internal class Program
 
         // Настройка хоста с DI
         var host = Host.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration((_, builder) => builder.AddConfiguration(configuration))
             .ConfigureServices(services =>
             {
                 services.AddLogging(logging =>

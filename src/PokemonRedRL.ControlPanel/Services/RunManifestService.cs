@@ -63,7 +63,20 @@ public class RunManifestService : IRunManifestService
     public void Save(RunManifest manifest)
     {
         var path = Path.Combine(manifest.RunDirectory, "manifest.json");
-        File.WriteAllText(path, JsonSerializer.Serialize(manifest, JsonOptions));
+        var temporary = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+        try
+        {
+            using (var stream = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            {
+                JsonSerializer.Serialize(stream, manifest, JsonOptions);
+                stream.Flush(flushToDisk: true);
+            }
+            File.Move(temporary, path, overwrite: true);
+        }
+        finally
+        {
+            if (File.Exists(temporary)) File.Delete(temporary);
+        }
     }
 
     public RunManifest Load(string manifestPath)

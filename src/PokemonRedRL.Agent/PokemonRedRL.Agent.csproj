@@ -18,6 +18,11 @@
     <ProjectReference Include="..\PokemonRedRL.DAL\PokemonRedRL.DAL.csproj" />
     <ProjectReference Include="..\PokemonRedRL.Models\PokemonRedRL.Models.csproj" />
     <ProjectReference Include="..\PokemonRedRL.Utils\PokemonRedRL.Utils.csproj" />
+    <ProjectReference Include="..\PokemonRedRL.Vision\PokemonRedRL.Vision.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

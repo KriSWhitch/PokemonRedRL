@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokemonRedRL.DAL", "Pokemon
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokemonRedRL.ControlPanel", "PokemonRedRL.ControlPanel\PokemonRedRL.ControlPanel.csproj", "{BFA96DE4-AD41-4B23-A08A-9FEFD3FA187A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokemonRedRL.Vision", "PokemonRedRL.Vision\PokemonRedRL.Vision.csproj", "{1F52E616-E7C6-4890-B218-BB9AB938CC3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokemonRedRL.Vision.Tests", "PokemonRedRL.Vision.Tests\PokemonRedRL.Vision.Tests.csproj", "{44553F90-F65B-459A-8013-AF4B26E2AB2D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +101,30 @@ Global
 		{BFA96DE4-AD41-4B23-A08A-9FEFD3FA187A}.Release|x64.Build.0 = Release|Any CPU
 		{BFA96DE4-AD41-4B23-A08A-9FEFD3FA187A}.Release|x86.ActiveCfg = Release|Any CPU
 		{BFA96DE4-AD41-4B23-A08A-9FEFD3FA187A}.Release|x86.Build.0 = Release|Any CPU
+		{1F52E616-E7C6-4890-B218-BB9AB938CC3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F52E616-E7C6-4890-B218-BB9AB938CC3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F52E616-E7C6-4890-B218-BB9AB938CC3D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1F52E616-E7C6-4890-B218-BB9AB938CC3D}.Debug|x64.Build.0 = Debug|Any CPU
+		{1F52E616-E7C6-4890-B218-BB9AB938CC3D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1F52E616-E7C6-4890-B218-BB9AB938CC3D}.Debug|x86.Build.0 = Debug|Any CPU
+		{1F52E616-E7C6-4890-B218-BB9AB938CC3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F52E616-E7C6-4890-B218-BB9AB938CC3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F52E616-E7C6-4890-B218-BB9AB938CC3D}.Release|x64.ActiveCfg = Release|Any CPU
+		{1F52E616-E7C6-4890-B218-BB9AB938CC3D}.Release|x64.Build.0 = Release|Any CPU
+		{1F52E616-E7C6-4890-B218-BB9AB938CC3D}.Release|x86.ActiveCfg = Release|Any CPU
+		{1F52E616-E7C6-4890-B218-BB9AB938CC3D}.Release|x86.Build.0 = Release|Any CPU
+		{44553F90-F65B-459A-8013-AF4B26E2AB2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44553F90-F65B-459A-8013-AF4B26E2AB2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44553F90-F65B-459A-8013-AF4B26E2AB2D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{44553F90-F65B-459A-8013-AF4B26E2AB2D}.Debug|x64.Build.0 = Debug|Any CPU
+		{44553F90-F65B-459A-8013-AF4B26E2AB2D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{44553F90-F65B-459A-8013-AF4B26E2AB2D}.Debug|x86.Build.0 = Debug|Any CPU
+		{44553F90-F65B-459A-8013-AF4B26E2AB2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44553F90-F65B-459A-8013-AF4B26E2AB2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44553F90-F65B-459A-8013-AF4B26E2AB2D}.Release|x64.ActiveCfg = Release|Any CPU
+		{44553F90-F65B-459A-8013-AF4B26E2AB2D}.Release|x64.Build.0 = Release|Any CPU
+		{44553F90-F65B-459A-8013-AF4B26E2AB2D}.Release|x86.ActiveCfg = Release|Any CPU
+		{44553F90-F65B-459A-8013-AF4B26E2AB2D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

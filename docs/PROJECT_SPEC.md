@@ -32,8 +32,11 @@
 |---|---|---|---|---|
 | ADR-0001 | ADR | Accepted | [Vision representation](adr/ADR-0001-vision-representation.md) | S7; cited by I1, E1, E2 |
 | ADR-0002 | ADR | Accepted | [RL algorithm selection](adr/ADR-0002-rl-algorithm-review.md) | S8; cited by I1, E2 |
+| ADR-0003 | ADR | Accepted | [Host-local vision frame pipeline](adr/ADR-0003-vision-frame-pipeline.md) | S9; Windows diagnostic capture, scoped frame ownership, Linux memory-only preservation; complements ADR-0001 |
 | BR-0001 | Brainstorm | Archived — Incorporated | [Epic roadmap review](../_bmad-output/archive/brainstorms/BR-0001-epic-roadmap-review.md) | I1, E1, E2, E4, ADR-0001 |
 | BR-0002 | Brainstorm | Archived — Incorporated | [Full architecture review](../_bmad-output/archive/brainstorms/BR-0002-full-architecture-review.md) | I1, E1, E2, E3, E4, ADR-0001, ADR-0002 |
+
+ADR-0003 includes the user-approved 2026-10-30 dependency correction: TorchVision 0.107.0 is required separately for the transforms specified by ADR-0001. This is a narrow exception to the earlier no-new-production-packages assumption, not a change to the vision representation.
 
 - **ADR IDs** use the `ADR-<4-digit-sequence>` namespace. The canonical filename is `ADR-0001-<slug>.md`; the decision date remains metadata in the ADR. ADRs are durable, append-only decisions: when one is replaced, mark it `Superseded`, set `Superseded by: ADR-nnnn`, and link the successor. Do not move or delete superseded ADRs because existing citations must remain stable.
 - **Brainstorm IDs** use the `BR-<4-digit-sequence>` namespace. The canonical filename is `BR-0001-<slug>.md`. Keep active/draft artifacts in `[paths].brainstorm_dir`. Once decisions are incorporated into an Initiative, Epic, Story, or ADR—or the ideas are explicitly abandoned—record the disposition and destination, then use `/bmad-archive` to move the brainstorm to `[paths].brainstorm_archive_dir` and update citations. Never delete the brainstorm or treat it as an authoritative decision source after incorporation.
@@ -45,6 +48,7 @@
 ### Stack
 - **Runtime:** .NET 10.0 (LTS)
 - **ML:** TorchSharp 0.107.0 (LibTorch 2.10.0, CUDA 12.8)
+- **Vision preprocessing:** TorchVision 0.107.0; S9 host-local diagnostic pipeline with measured capacity and user-approved verification exceptions, not yet integrated with learning. Pass with Notes review and user-confirmed deferral of existing MessagePack remediation are recorded in the archived S9 plan; workflow status remains in WORK_ITEMS.md.
 - **Database:** Redis Stack 7.4+ (RediSearch module required)
 - **Emulator:** mGBA 0.10.5 (vendored, Windows)
 - **UI:** WPF ControlPanel (`net10.0-windows`)
@@ -93,7 +97,7 @@ The active Initiative, completed history, child Epics/Stories/Bugs, statuses, de
 | GPU/VRAM budget for CNN across 10 agents | MEDIUM | S8's ~261 MB / >10 GB headroom is a theoretical estimate; S11 measures peak runtime memory when CUDA is available and records any environment blocker. |
 | Tensor leaks with frame tensors | HIGH | Soak-test in S9/S11; explicit disposal review |
 | Redis payload size with frames | HIGH | S11 measures per-experience size and projects 10 agents × batch × max stream against a finite configured Redis memory budget; if no budget exists, resolve it before storage approval; if projected use exceeds 50%, store CNN embeddings instead of raw frames unless an approved course correction chooses another bounded strategy. |
-| No CI/test infrastructure | MEDIUM | S14 adds xUnit; contract test in S10; skeleton created early |
+| Incomplete test coverage and no CI | MEDIUM | S9 adds focused xUnit and live capacity evidence; the user accepts remaining unverified live DPI/long multi-window soak risks, recorded in its Pass with Notes review. Broader infrastructure is S14 and protocol coverage S10. |
 | mGBA C API instability (P/Invoke) | MEDIUM | Pin mGBA version; spike first (S17); TCP+Lua is fallback |
 | ControlPanel performance with 20 streams | MEDIUM | 5 fps/agent; WriteableBitmap pooling; Blazor Server as Plan B |
 

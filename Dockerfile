@@ -9,6 +9,7 @@ COPY src/PokemonRedRL.Core/PokemonRedRL.Core.csproj src/PokemonRedRL.Core/
 COPY src/PokemonRedRL.Models/PokemonRedRL.Models.csproj src/PokemonRedRL.Models/
 COPY src/PokemonRedRL.DAL/PokemonRedRL.DAL.csproj src/PokemonRedRL.DAL/
 COPY src/PokemonRedRL.Utils/PokemonRedRL.Utils.csproj src/PokemonRedRL.Utils/
+COPY src/PokemonRedRL.Vision/PokemonRedRL.Vision.csproj src/PokemonRedRL.Vision/
 
 RUN dotnet restore src/PokemonRedRL.Agent/PokemonRedRL.Agent.csproj -r linux-x64
 

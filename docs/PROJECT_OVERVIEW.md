@@ -20,7 +20,7 @@ The goal is to train a reinforcement-learning agent that plays **Pokémon Red** 
 - **Prioritized replay:** priorities are derived from TD-error magnitude (`Math.Abs(tdError)`), sampled with ~70% prioritized / ~30% uniform-random mix (`ExplorationAgent.TrainWithAutoBatch`, `LoadInitialExperienceAsync`) to balance exploiting high-error transitions against avoiding overfitting to a narrow experience slice.
 - **Multi-agent weight sharing:** `ParameterServer` periodically pushes/pulls the full model `state_dict` to/from a single Redis key (`DQNTrainer.SyncWithGlobalModel`), so independently-running agents converge toward one shared policy instead of training N unrelated models. `AdaptiveLRScheduler` similarly persists a shared, reward-driven learning-rate schedule in Redis so all agents adapt learning rate together based on a smoothed global reward signal (`ExplorationAgent`/`DQNTrainer.TrackEpisodeReward`).
 
-## 3. Why the project is split into 5 assemblies
+## 3. Why the projects are separated
 
 | Project | Why it's separate |
 |---|---|
@@ -29,6 +29,10 @@ The goal is to train a reinforcement-learning agent that plays **Pokémon Red** 
 | `PokemonRedRL.Core` | Everything about *talking to the emulator* and turning raw state into RL-ready signals: the TCP/socket protocol, the emulator client, reward shaping, state normalization. This is the layer that would need to change if the bridge protocol changed or a different emulator/game were targeted. |
 | `PokemonRedRL.Models` | Everything about *learning*: the network, the trainer, prioritized replay, Redis-backed experience/parameter storage. Deliberately emulator-agnostic — nothing in here references sockets, mGBA, or Lua. |
 | `PokemonRedRL.Agent` | The composition root: wires up DI, decides how many parallel agents to run, and owns the episode loop (`ExplorationAgent`) that ties `Core` (perception/action) and `Models` (learning) together. |
+| `PokemonRedRL.ControlPanel` | Windows desktop supervision and operator-selected process/window associations; training diagnostics consume its persisted manifest without depending on WPF. |
+| `PokemonRedRL.Vision` | Windows-guarded native capture plus platform-independent TorchSharp/TorchVision preprocessing and per-agent frame history. S9 currently exposes it through diagnostics, not the learner. |
+
+`PokemonRedRL.Vision.Tests` is the focused S9 xUnit project; it also checks configuration, memory-state regression, manifest persistence, and separate-process startup. S9 live evidence now includes game-only viewport inspection, lifecycle checks, a historical one-window soak, and short three/ten-window measurements with previews off/on. Actual DPI changes and longer higher-concurrency resource stability remain unverified.
 
 This mirrors a fairly standard "ports and adapters" split: `Core` is the adapter to the outside world (emulator), `Models` is the domain/algorithm, `DAL`/`Utils` are shared primitives, `Agent` is the entry point.
 
@@ -86,7 +90,17 @@ These were identified while writing this document and are recorded here rather t
 - **There is no scripted/headless way to load a Lua script in mGBA 0.10.5** — no CLI flag, no config key. External keyboard-simulation automation (`SendInput`/`keybd_event` targeting the Tools menu) was attempted and did not reliably work from an external process, a known category of Windows synthetic-input limitation, not a simple bug.
 - This means **reliable, unattended multi-instance training launch is currently a real, unsolved production gap**, independent of vision — see the roadmap's Task 2.
 
-## 8. Where to go next
+## 8. S9 Implementation Boundary
+
+On 2026-10-30 the user explicitly accepted the remaining unexecuted verification scenarios, including live DPI transition and the longer higher-concurrency soak, and the measured capacity limitations. These remain unverified/limited results, not fabricated passes. The subsequent mandatory acceptance review records Pass with Notes; archive, commit, and merge remain separate workflow actions.
+
+The host-local frame pipeline now has a diagnostic implementation: manifest-backed PID/HWND validation, PrintWindow with an explicit game viewport, scoped F=2 tensor preprocessing, resource/latency metrics, and optional BMP capture. The default Vision.Enabled=false path retains the existing memory learner; enabled learning is explicitly rejected until S11. Diagnostic mode branches before Redis initialization. Linux Docker builds and its unsupported-capture guard have been checked, but a full Linux training run has not.
+
+TorchVision transforms require the separate TorchVision 0.107.0 NuGet package, contrary to S6/S7's earlier assumption that TorchSharp alone supplied them. The user-approved exception is recorded in ADR-0003. The implementation uses the approved explicit viewport fallback rather than guessing Qt renderer classes or trimming dark pixels. See the S9 plan for invocation and acceptance evidence. Three and ten simultaneous windows sustain the tested 4 Hz cadence after startup, with previews off/on. At requested 40 Hz, three workers deliver approximately 32-36 successful frames/s per slot; ten deliver approximately 13-15 and fail the 25 ms p95 target. Off-page capture and a historical one-window 30-minute soak pass. Actual DPI transitions remain unverified on the single available 100%-scale monitor. The user's later limit caps new tests at five minutes; it does not retroactively invalidate the earlier soak or silently waive the longer higher-concurrency stability gate.
+
+The memory-only regression fixture intentionally preserves existing normalization exactly, including Money's current integer division. This behavior was not corrected as part of vision work.
+
+## 9. Where to go next
 
 - File-by-file structure: [docs/CODEBASE_MAP.md](CODEBASE_MAP.md).
 - Repo-wide conventions and the plan → review → implement → review → commit workflow: [.github/copilot-instructions.md](../.github/copilot-instructions.md).
