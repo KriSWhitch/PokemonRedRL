@@ -22,13 +22,13 @@ Legacy roadmap aliases: T1=S1, T2=S2, T2b=S3, T3=S4, T3b=S5, T4a=S6, T4=S7, T5=S
 
 | ID | Initiative | Status | Branch | Branch state | Progress | Next |
 |---|---|---|---|---|---|---|
-| I1 | [Computer-Vision + RL Overhaul](initiatives/I1-computer-vision-rl-overhaul.md) | In Progress | `initiative/i1-computer-vision-rl-overhaul` | Not created | 8/15 core Stories done | S9 |
+| I1 | [Computer-Vision + RL Overhaul](initiatives/I1-computer-vision-rl-overhaul.md) | In Progress | `initiative/i1-computer-vision-rl-overhaul` | Active | 8/15 core Stories done | S9 |
 
 ## Epics
 
 | ID | Epic | Parent | Status | Branch | Branch state | Child Stories |
 |---|---|---|---|---|---|---|
-| E1 | [Vision Perception and Pipeline](epics/E1-vision-perception.md) | I1 | Planned | `epic/e1-vision-perception` | Not created | S1, S7, S9, S12 |
+| E1 | [Vision Perception and Pipeline](epics/E1-vision-perception.md) | I1 | Planned | `epic/e1-vision-perception` | Active | S1, S7, S9, S12 |
 | E2 | [RL Training and Models](epics/E2-rl-training-and-models.md) | I1 | Planned | `epic/e2-rl-training-and-models` | Not created | S8, S11, S13 |
 | E3 | [Emulator Integration and Runtime](epics/E3-emulator-integration-runtime.md) | I1 | Planned | `epic/e3-emulator-integration-runtime` | Not created | S3, S10 |
 | E4 | [Reliability and Validation](epics/E4-reliability-validation.md) | I1 | Planned | `epic/e4-reliability-validation` | Not created | S2, S4, S5, S6, S14, S15 |
