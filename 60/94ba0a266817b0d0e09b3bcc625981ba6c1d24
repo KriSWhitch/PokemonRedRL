@@ -1,0 +1,111 @@
+docs/CODEBASE_MAP.md
+  s_e18a3fb7d07f93::t_22ac6091faec48 5,73-109,143-144,195,269-270,274
+docs/PROJECT_OVERVIEW.md
+  s_e18a3fb7d07f93::t_e4f9e4664687e1 23,32-35,93-103
+docs/PROJECT_SPEC.md
+  s_e18a3fb7d07f93::t_adc56f3b112553 35,39-40,51,100
+docs/WORK_ITEMS.md
+  s_e18a3fb7d07f93::t_aa835afd69755a 16,48
+runs/s9-live/Probe.csproj
+  s_914be8cddd3558::t_4124d8c50e783d 1-15
+src/PokemonRedRL.ControlPanel/ViewModels/MainViewModel.cs
+  s_e18a3fb7d07f93::t_37a885030dcd24 25,114,161-171
+src/PokemonRedRL.sln
+  s_914be8cddd3558::t_091d24e0a4a72a 18-21,104-127
+Dockerfile
+  s_bf18f29b2630cc::t_08564f61813377 12
+docs/adr/ADR-0003-vision-frame-pipeline.md
+  s_914be8cddd3558::t_12d8df29db7ab3 1-93
+docs/stories/archive/S9-vision-project-frame-pipeline.md
+  s_914be8cddd3558::t_8bb323169dd68d 1-339
+runs/s9-live/Program.cs
+  s_914be8cddd3558::t_14805be2b63ed6 1-144
+runs/s9-live/RunConcurrent.ps1
+  s_914be8cddd3558::t_85033f098f461d 1-41
+runs/s9-live/WithPreviews.ps1
+  s_914be8cddd3558::t_ef06c359b462a1 1-31
+runs/s9-preview/Preview.csproj
+  s_914be8cddd3558::t_e868756f24bad7 1-13
+runs/s9-preview/Program.cs
+  s_914be8cddd3558::t_65fc84b35ce6cf 1-117
+src/PokemonRedRL.Agent/AgentRuntimeConfiguration.cs
+  s_914be8cddd3558::t_775aa45c66fcbc 1-33
+src/PokemonRedRL.Agent/PokemonRedRL.Agent.csproj
+  s_914be8cddd3558::t_8247e30793ca66 21-25
+src/PokemonRedRL.Agent/Program.cs
+  s_f64b5f38c35d7d::t_a219a85a40946a 2,23-39,50
+src/PokemonRedRL.Agent/VisionDiagnostics.cs
+  s_914be8cddd3558::t_f0ab18193a4f0d 1-166
+src/PokemonRedRL.Agent/appsettings.json
+  s_914be8cddd3558::t_bcd45825e9bc06 2-4
+src/PokemonRedRL.ControlPanel/Services/RunManifestService.cs
+  s_f64b5f38c35d7d::t_ac96f0ac437c72 66-79
+src/PokemonRedRL.Vision.Tests/BindingTests.cs
+  s_914be8cddd3558::t_4b5d6f51737cbe 1-37
+src/PokemonRedRL.Vision.Tests/CaptureTests.cs
+  s_914be8cddd3558::t_5facf4c1b154ac 1-78
+src/PokemonRedRL.Vision.Tests/ConfigurationTests.cs
+  s_914be8cddd3558::t_e159bd1911ba21 1-71
+src/PokemonRedRL.Vision.Tests/FrameTests.cs
+  s_914be8cddd3558::t_e896e8654c06ff 1-35
+src/PokemonRedRL.Vision.Tests/ManifestTests.cs
+  s_914be8cddd3558::t_82ae0982ecf262 1-31
+src/PokemonRedRL.Vision.Tests/PokemonRedRL.Vision.Tests.csproj
+  s_914be8cddd3558::t_26596cd3618087 1-27
+src/PokemonRedRL.Vision.Tests/PreprocessorTests.cs
+  s_914be8cddd3558::t_cd30229ffc870c 1-107
+src/PokemonRedRL.Vision.Tests/StartupTests.cs
+  s_914be8cddd3558::t_9f3cc5db24ffe4 1-72
+src/PokemonRedRL.Vision/Frame.cs
+  s_914be8cddd3558::t_514dd2ae4f744e 1-41
+src/PokemonRedRL.Vision/FrameBinding.cs
+  s_914be8cddd3558::t_cee18b7ffcf6fd 1-46
+src/PokemonRedRL.Vision/PokemonRedRL.Vision.csproj
+  s_914be8cddd3558::t_28e6ae19a956c5 1-11
+src/PokemonRedRL.Vision/VisionPreprocessorService.cs
+  s_914be8cddd3558::t_f6c847c138d9d3 1-75
+src/PokemonRedRL.Vision/Win32CaptureBackend.cs
+  s_914be8cddd3558::t_0c0bcdfa2627b5 1-113
+src/PokemonRedRL.Vision/WindowFrameProvider.cs
+  s_914be8cddd3558::t_db2843c7bdd95d 1-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "6094ba0a266817b0d0e09b3bcc625981ba6c1d24",
+  "prompts": {},
+  "sessions": {
+    "s_914be8cddd3558": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "9200730f-0333-4ba1-96e1-21f8d5e44df0",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    },
+    "s_bf18f29b2630cc": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "e5464b1a-87b5-4ce5-a2b7-2b5914c8c521",
+        "model": "unknown"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    },
+    "s_e18a3fb7d07f93": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "6e32ade6-cd95-42cc-9dc7-789e94f84c04",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    },
+    "s_f64b5f38c35d7d": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "3b50430e-8ac6-478f-942c-22b9c3a90253",
+        "model": "unknown"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    }
+  }
+}
