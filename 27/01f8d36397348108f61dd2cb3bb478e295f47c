@@ -1,0 +1,19 @@
+docs/WORK_ITEMS.md
+  s_e18a3fb7d07f93::t_afd1ca1f270da4 25,31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "2701f8d36397348108f61dd2cb3bb478e295f47c",
+  "prompts": {},
+  "sessions": {
+    "s_e18a3fb7d07f93": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "6e32ade6-cd95-42cc-9dc7-789e94f84c04",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Aliaksei Mukavozchyk <krisfragerfeed@gmail.com>"
+    }
+  }
+}
