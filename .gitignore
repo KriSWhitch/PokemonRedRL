@@ -16,6 +16,18 @@ packages/
 
 # PokemonRedRL.ControlPanel generated run manifests/logs (runs/<timestamp>/...)
 runs/
+!/runs/
+/runs/*
+!/runs/s9-live/
+/runs/s9-live/*
+!/runs/s9-live/Probe.csproj
+!/runs/s9-live/Program.cs
+!/runs/s9-live/RunConcurrent.ps1
+!/runs/s9-live/WithPreviews.ps1
+!/runs/s9-preview/
+/runs/s9-preview/*
+!/runs/s9-preview/Preview.csproj
+!/runs/s9-preview/Program.cs
 
 # Lua
 

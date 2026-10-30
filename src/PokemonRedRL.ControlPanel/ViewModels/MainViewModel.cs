@@ -22,6 +22,7 @@ public class MainViewModel : ViewModelBase, IDisposable
     private readonly IEmulatorPingProbe _pingProbe;
     private readonly IPreviewCaptureService _previewCapture;
     private readonly IWindowEnumerationService _windowEnumeration;
+    private RunManifest? _activeManifest;
 
     // AgentProcessManager raises its events from Process's background reader threads, not the UI
     // thread — all handlers must marshal through this before touching bound collections/properties.
@@ -110,6 +111,7 @@ public class MainViewModel : ViewModelBase, IDisposable
     {
         var manifest = _manifestService.CreateRun(
             Path.GetFullPath(RunRootDirectory), RomPath, AgentCount, BasePort, LaunchMode, SpeedProfile, Host);
+        _activeManifest = manifest;
 
         AllTiles.Clear();
         foreach (var slot in manifest.Agents)
@@ -156,6 +158,17 @@ public class MainViewModel : ViewModelBase, IDisposable
     {
         tile.WindowHandle = window.Handle;
         tile.Slot.EmulatorProcessId = window.ProcessId;
+        if (_activeManifest is not null)
+        {
+            try
+            {
+                _manifestService.Save(_activeManifest);
+            }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+            {
+                tile.ErrorMessage = $"Window attached but manifest save failed: {error.Message}";
+            }
+        }
     }
 
     private void RefreshCurrentPage()

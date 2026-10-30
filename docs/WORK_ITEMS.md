@@ -13,7 +13,7 @@ IDs are project-global, sequential by type, stable, and never reused or renumber
 | Epic | E1-E4 | E5 |
 | Story/Bug | S0, S1-S19, S21 | S22 |
 | Retired Story ID | S20 (mistaken migration allocation; never reuse) | - |
-| ADR | ADR-0001-ADR-0002 | ADR-0003 |
+| ADR | ADR-0001-ADR-0003 | ADR-0004 |
 | Brainstorm | BR-0001-BR-0002 | BR-0003 |
 
 Legacy roadmap aliases: T1=S1, T2=S2, T2b=S3, T3=S4, T3b=S5, T4a=S6, T4=S7, T5=S8, T6=S9, T7=S10, T8=S11, T9=S12, T10=S13, T11=S14, T12=S15, T13=S16, T14=S17, T15=S18, T16=S19. S0 is the historical repository refactor; S20 is retired and never reused; S21 is the Copilot BMAD workflow.
@@ -45,7 +45,7 @@ Legacy roadmap aliases: T1=S1, T2=S2, T2b=S3, T3=S4, T3b=S5, T4a=S6, T4=S7, T5=S
 | S6 | Remove OpenCV, adopt torchvision | E4 | Core | Done | - | S7 | - | Historical; branch not tracked | [Archive](stories/archive/S6-remove-opencv-adopt-torchvision.md) |
 | S7 | Vision-memory representation | E1 | Core | Done | S1, S5, S6 | S9, S11 | - | Historical; branch not tracked | [Archive](stories/archive/S7-design-vision-representation.md) |
 | S8 | RL algorithm review | E2 | Core | Done | - | S11 | - | Historical; branch not tracked | [Archive](stories/archive/S8-rl-algorithm-review.md) |
-| S9 | Vision project and frame pipeline | E1 | Core | Next | S1, S3, S7 | S12, S18 | `story/s9-vision-project-frame-pipeline` | Not created | [Epic detail](epics/E1-vision-perception.md#child-user-stories) |
+| S9 | Vision project and frame pipeline | E1 | Core | Done | S1, S3, S7 | S12, S18 | `story/s9-vision-project-frame-pipeline` | Merged into epic/e1-vision-perception | [Archive](stories/archive/S9-vision-project-frame-pipeline.md) |
 | S10 | Protocol verification and contract test | E3 | Core | Planned | S1 | - | `story/s10-protocol-contract-test` | Not created | [Epic detail](epics/E3-emulator-integration-runtime.md#child-user-stories) |
 | S11 | Dual-modality network and trainer | E2 | Core | Planned | S7, S8 | S16, S19 | `story/s11-dual-modality-network-trainer` | Not created | [Epic detail](epics/E2-rl-training-and-models.md#child-user-stories) |
 | S12 | Vision-aware reward shaping | E1 | Core | Planned | S2, S9 | - | `story/s12-vision-aware-reward-shaping` | Not created | [Epic detail](epics/E1-vision-perception.md#child-user-stories) |
